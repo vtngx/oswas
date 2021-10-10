@@ -13,7 +13,13 @@ def main():
 
   # run module 1
   # find login link
-  project.find_auth_link()
+  auth_url = project.find_auth_link()
+
+  print(auth_url)
+
+  # if auth_url is found (!= None) - manual login with Selenium
+  # else start to crawl
+
   
 if __name__ == "__main__":
   main()

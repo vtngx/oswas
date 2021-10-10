@@ -42,8 +42,6 @@ class Project:
       print("> Please enter login page:")
       auth_url = input()
 
-      # TODO: manual login with Selenium
-
       # add Links to DB
       if (Utils.eq_urls(url, auth_url)):
         link_db = Utils.linkToDbObject(url, True, UserCrawlType.USER1)
@@ -74,8 +72,6 @@ class Project:
         auth_url = ds_links[(choice)]
         ds_links.append(url)
 
-        # TODO: manual login with Selenium
-
         # add Links to DB
         links_db = Utils.linksToDbObjectList(ds_links, True, UserCrawlType.USER1)
       else:
@@ -85,8 +81,6 @@ class Project:
         # check if start_url is auth_link
         if Utils.check_authlink(url):
           auth_url = url
-          # TODO: manual login with Selenium
-          print('manual login')
 
       self.db.createLinksMulti(links_db)
     
