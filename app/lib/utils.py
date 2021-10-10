@@ -3,7 +3,7 @@ import bs4
 import requests
 from urllib.parse import urlparse, parse_qsl, unquote_plus
 
-from .constants import LinkStatus, UserCrawlType
+from .constants import LinkStatus, UserCrawlType, AuthKeywords
 
 class Utils():
   # def __init__(self):
@@ -47,7 +47,7 @@ class Utils():
 
   @staticmethod
   def check_authlink(url) -> bool:
-    keywords = []
+    keywords = AuthKeywords
     html_output_name = urlparse(url).scheme
 
     # TODO: issues 

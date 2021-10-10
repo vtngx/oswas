@@ -1,3 +1,6 @@
+from os import stat
+
+
 class TargetStatus:
   DOING   = "DOING"   # mới khởi tạo Target
   DONE    = "DONE"    # đã crawl xong
@@ -14,8 +17,6 @@ class UserCrawlType:
   ADMIN   = "ADMIN"   # crawl as admin user
   NO_AUTH = None      # crawl without authen
 
-class AuthKeywords:
-  keywords = []
-
-  def __init__(self):
-    pass
+AuthKeywords = [
+  'login', 'loginform', 'log in', 'signin', 'sign in', 'dang-nhap',
+]
