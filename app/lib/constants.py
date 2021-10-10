@@ -18,5 +18,5 @@ class UserCrawlType:
   NO_AUTH = None      # crawl without authen
 
 AuthKeywords = [
-  'login', 'loginform', 'log in', 'signin', 'sign in', 'dang-nhap',
+  'login', 'loginform', 'log in', 'signin', 'sign in', 'dang-nhap', 'Sign in'
 ]

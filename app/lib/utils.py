@@ -50,14 +50,14 @@ class Utils():
     keywords = AuthKeywords
     html_output_name = urlparse(url).scheme
 
-    # TODO: issues 
+    # TODO: issues
     # - ko check đc code của navbar/footer/...
     # - có ký tự ko encode được trên windows
     res = requests.get(url)
     html_doc = res.text
 
     with open(html_output_name, 'w') as f:
-      f.write(res.text)
+      f.write(str(res))
       f.close()
 
     a_file = open(html_output_name)
@@ -70,15 +70,15 @@ class Utils():
         os.remove(html_output_name)
         return True
 
+    # Check type="submit" and type="password"
+    response = requests.get(url)
+    html_doc = response.text
     soup = bs4.BeautifulSoup(html_doc, 'html.parser')
 
-    # find_input_submit = soup.findAll(type="submit")
-    # find_input_password = soup.findAll(type="password")
-    find_form = soup.select('form')
-    find_input_password = soup.select('form input[type="password"]')
-    find_input_submit = soup.select('form input[type="submit"]')
+    eles = soup.select("form input[type=submit]")
+    eles1 = soup.select("form input[type=password]")
 
-    if bool(find_form and find_input_password and find_input_submit):
+    if (bool(eles) and bool(eles1)):
       return True
 
     return False
