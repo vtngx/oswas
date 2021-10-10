@@ -10,9 +10,9 @@ class Database:
     self.Targets = self.db['targets']
 
   def _connect(self):
-    CONNECTION_STRING = os.getenv("MONGO_URI")
+    CONNECTION_STRING = os.getenv('MONGO_URI')
     client = MongoClient(CONNECTION_STRING)
-    return client["oswas-db"]
+    return client['oswas-db']
   
   def createTarget(self, target):
     self.Targets.insert(target)
@@ -22,3 +22,11 @@ class Database:
 
   def createLinksMulti(self, links):
     self.Links.insert_many(links)
+
+  def updateTarget(self, targetId, updateData):
+    self.Targets.update(
+      { '_id': targetId },
+      {
+        '$set': updateData,
+      }
+    ) 

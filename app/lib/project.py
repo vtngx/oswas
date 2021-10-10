@@ -22,7 +22,7 @@ class Project:
     self.start_url = input()
 
     if (self.start_url):
-      self.db.createTarget({
+      self.Target = self.db.createTarget({
         "start_url": self.start_url,
         "auth_url": None,
         "domain": "",
@@ -91,7 +91,7 @@ class Project:
       self.db.createLinksMulti(links_db)
     
     if auth_url:
-      # update Target
-      print()
+      # update uth_url of Target
+      self.db.updateTarget({ 'auth_url': auth_url })
 
     return auth_url   # None || found login link
