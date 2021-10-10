@@ -1,23 +1,19 @@
 import sys
-from dotenv import load_dotenv
 
-from lib import Project, Options, Database
+from lib import Project, Options
 
 def main():
-  # load .env
-  load_dotenv()
-
   # parse arguments
   options = Options()
   (opts, args) = options.parse(sys.argv[1:])
 
   # start app
   project = Project(opts)
-  # print(project.get_args())
+  project.start()
 
-  # connect DB
-  db = Database()
-
+  # run module 1
+  # find login link
+  project.find_auth_link()
   
 if __name__ == "__main__":
   main()
