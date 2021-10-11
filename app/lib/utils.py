@@ -71,8 +71,6 @@ class Utils():
         return True
 
     # Check type="submit" and type="password"
-    response = requests.get(url)
-    html_doc = response.text
     soup = bs4.BeautifulSoup(html_doc, 'html.parser')
 
     eles = soup.select("form input[type=submit]")
