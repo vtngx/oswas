@@ -17,7 +17,9 @@ def main():
 
   print(auth_url)
 
-  # if auth_url is found (!= None) - manual login with Selenium
+  # if auth_url is found (!= None)
+  #   - manual login with Selenium
+  #   - update status of login link -> DONE
   # else start to crawl
 
   
