@@ -5,7 +5,7 @@ from urllib.parse import urlparse, parse_qsl, unquote_plus
 
 from .constants import LinkStatus, UserCrawlType, AuthKeywords
 
-class Utils():
+class Utils:
   # def __init__(self):
 
   @staticmethod
@@ -57,7 +57,7 @@ class Utils():
     html_doc = res.text
 
     with open(html_output_name, 'w') as f:
-      f.write(str(res))
+      f.write(str(res.text))
       f.close()
 
     a_file = open(html_output_name)
@@ -70,6 +70,7 @@ class Utils():
         os.remove(html_output_name)
         return True
 
+    os.remove(html_output_name)
     # Check type="submit" and type="password"
     soup = bs4.BeautifulSoup(html_doc, 'html.parser')
 
