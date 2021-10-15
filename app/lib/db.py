@@ -15,18 +15,22 @@ class Database:
     return client['oswas-db']
   
   def createTarget(self, target):
-    self.Targets.insert(target)
+    data = self.Targets.insert(target)
+    return data 
 
   def createLink(self, link):
-    self.Links.insert(link)
+    data = self.Links.insert(link)
+    return data
 
   def createLinksMulti(self, links):
-    self.Links.insert_many(links)
+    data = self.Links.insert_many(links)
+    return data
 
   def updateTarget(self, targetId, updateData):
-    self.Targets.update(
+    data = self.Targets.update(
       { '_id': targetId },
       {
         '$set': updateData,
       }
-    ) 
+    )
+    return data

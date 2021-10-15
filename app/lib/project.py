@@ -68,8 +68,9 @@ class Project:
 
       print(f"\n> Please select link to login (1-{len(ds_links)}) or select 0 if you cannot find one:")
       choice = int(input())
+      
       if choice != 0:
-        auth_url = ds_links[(choice)]
+        auth_url = ds_links[choice]
         ds_links.append(url)
 
         # add Links to DB
@@ -86,6 +87,6 @@ class Project:
     
     if auth_url:
       # update uth_url of Target
-      self.db.updateTarget({ 'auth_url': auth_url })
+      self.db.updateTarget(self.Target, { 'auth_url': auth_url })
 
     return auth_url   # None || found login link
