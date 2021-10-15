@@ -36,4 +36,6 @@ class Dirsearch:
     with open(fileName) as f:
       while (line := f.readline().rstrip()):
         listUrl.append(line)
+    # delete dirsearch output file
+    os.remove(fileName)
     return listUrl  
