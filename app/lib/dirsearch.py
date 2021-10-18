@@ -25,17 +25,19 @@ class Dirsearch:
     print(path)
     os.chdir('dirsearch')
     os.system
-    os.system(f'python3 dirsearch.py -u {self.url} -e php,js -x 403,401 --format simple -o ../{self.parseUrl}_report.txt')
+    os.system(f'python3 dirsearch.py -q -u {self.url} -e php,js -i 200,300-399 -x 400-599 --format simple -o ../{self.parseUrl}_report.txt')
     os.chdir("../")
-    print('run dirsearch done')
 
   # get links from dirsearch output
   def getURL(self):
-    fileName = f'{self.parseUrl}_report.txt'
+    fileName = f'{self.parseUrl}.dsout.txt'
     listUrl = []
-    with open(fileName) as f:
-      while (line := f.readline().rstrip()):
-        listUrl.append(line)
-    # delete dirsearch output file
-    os.remove(fileName)
+    try:
+      with open(fileName) as f:
+        while (line := f.readline().rstrip()):
+          listUrl.append(line)
+      # delete dirsearch output file
+      os.remove(fileName)
+    except:
+      pass
     return listUrl  

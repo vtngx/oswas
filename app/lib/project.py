@@ -18,8 +18,7 @@ class Project:
 
   # start function
   def start(self):
-    print('> Enter the URL: ')
-    self.start_url = input()
+    self.start_url = input('> Enter the URL: ')
 
     if (self.start_url):
       self.Target = self.db.createTarget({
@@ -35,12 +34,13 @@ class Project:
     auth_url = None
 
     # prompt user to input auth_link
-    print("> Do you have login page ?(y/n)")
-    choice = input()
+    choice = input('> Do you have login page? (y/N)')
+
+    if not choice:
+      choice = 'n'
     
     if choice.lower() == 'y':
-      print("> Please enter login page:")
-      auth_url = input()
+      auth_url = input('> Please enter login page:')
 
       # add Links to DB
       if (Utils.eq_urls(url, auth_url)):
@@ -61,29 +61,36 @@ class Project:
       ds._run()
       ds_links = ds.getURL()
 
-      # ask user to find login_url from list
-      print("> The following links are likely to be the login link")
-      for link in ds_links:
-        print("-", link)
+      if len(ds_links):
+        # ask user to find login_url from list
+        print("> The following links are likely to be the login link")
+        for link in ds_links:
+          print("-", link)
 
-      print(f"\n> Please select link to login (1-{len(ds_links)}) or select 0 if you cannot find one:")
-      choice = int(input())
+        choice = input(f"\n> Please select link to login (1-{len(ds_links)}) or select 0 if you cannot find one:")
+
+        if not choice: choice = 0
+        else: choice = int(choice)
       
-      if choice != 0:
-        auth_url = ds_links[choice]
-        ds_links.append(url)
+        if choice != 0:
+          auth_url = ds_links[choice]
+          ds_links.append(url)
 
-        # add Links to DB
-        links_db = Utils.linksToDbObjectList(ds_links, True, UserCrawlType.USER1)
+          # add Links to DB
+          links_db = Utils.linksToDbObjectList(ds_links, True, UserCrawlType.USER1)
+        else:
+          # add Links to DB
+          links_db = Utils.linksToDbObjectList(ds_links)
+
+          # check if start_url is auth_link
+          if Utils.check_authlink(url):
+            auth_url = url
+
+        self.db.createLinksMulti(links_db)
       else:
-        # add Links to DB
-        links_db = Utils.linksToDbObjectList(ds_links)
-
-        # check if start_url is auth_link
+        print("!! dirsearch did not find any links")
         if Utils.check_authlink(url):
           auth_url = url
-
-      self.db.createLinksMulti(links_db)
     
     if auth_url:
       # update uth_url of Target
