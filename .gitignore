@@ -90,3 +90,5 @@ ENV/
 
 dirsearch
 .idea
+
+bin/*.txt
