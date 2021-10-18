@@ -1,3 +1,4 @@
+import os
 from .db import Database
 from .utils import Utils
 from dotenv import load_dotenv
@@ -18,6 +19,7 @@ class Project:
 
   # start function
   def start(self):
+    os.system('clear')
     self.start_url = input('> Enter the URL: ')
 
     if (self.start_url):

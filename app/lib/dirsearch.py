@@ -8,6 +8,7 @@ class Dirsearch:
     self._install()
     self.url = url
     self.parseUrl = parseUrl
+    self.output_file = str(self.parseUrl) + '.dsout.txt'
 
   # clone from gh & install
   def _install(self):
@@ -16,21 +17,20 @@ class Dirsearch:
       os.chdir('dirsearch')
       os.system('pip3 install -r requirements.txt')
       os.chdir("../")
-    print('dirsearch done')
     return 1
 
   # run dirsearch
   def _run(self):
     path = os.getcwd()
-    print(path)
     os.chdir('dirsearch')
     os.system
-    os.system(f'python3 dirsearch.py -q -u {self.url} -e php,js -i 200,300-399 -x 400-599 --format simple -o ../{self.parseUrl}_report.txt')
+    os.system(f'python3 dirsearch.py -q -u {self.url} -e php,js -i 200,300-399 -x 400-599 --format simple -o ../{self.output_file}')
     os.chdir("../")
+    os.system('clear')
 
   # get links from dirsearch output
   def getURL(self):
-    fileName = f'{self.parseUrl}.dsout.txt'
+    fileName = f'{self.output_file}'
     listUrl = []
     try:
       with open(fileName) as f:
