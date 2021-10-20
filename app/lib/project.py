@@ -1,4 +1,5 @@
 import os
+import colorama
 from .db import Database
 from .utils import Utils
 from dotenv import load_dotenv
@@ -10,6 +11,7 @@ class Project:
 
   def __init__(self, options):
     load_dotenv()
+    colorama.init()
     self.options = options
     self.db = Database()
 
@@ -65,17 +67,9 @@ class Project:
 
       if len(ds_links):
         # ask user to find login_url from list
-        print("> The following links are likely to be the login link")
-        for link in ds_links:
-          print("-", link)
-
-        choice = input(f"\n> Please select link to login (1-{len(ds_links)}) or select 0 if you cannot find one:")
-
-        if not choice: choice = 0
-        else: choice = int(choice)
+        auth_url = Utils.pager_input(ds_links, 20)
       
-        if choice != 0:
-          auth_url = ds_links[choice]
+        if auth_url:
           ds_links.append(url)
 
           # add Links to DB

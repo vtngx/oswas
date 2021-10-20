@@ -1,6 +1,6 @@
 import os
 import os.path
-from os import path
+from urllib.parse import urlparse
 
 class Dirsearch:
   
@@ -12,7 +12,7 @@ class Dirsearch:
 
   # clone from gh & install
   def _install(self):
-    if not path.exists('dirsearch'):
+    if not os.path.exists('dirsearch'):
       os.system('git clone https://github.com/maurosoria/dirsearch.git')
       os.chdir('dirsearch')
       os.system('pip3 install -r requirements.txt')
@@ -30,14 +30,24 @@ class Dirsearch:
 
   # get links from dirsearch output
   def getURL(self):
-    fileName = f'{self.output_file}'
-    listUrl = []
+    file_name = f'{self.output_file}'
+    list_urls = []
+    
     try:
-      with open(fileName) as f:
+      with open(file_name) as f:
         while (line := f.readline().rstrip()):
-          listUrl.append(line)
+          list_urls.append(line)
       # delete dirsearch output file
-      os.remove(fileName)
+      os.remove(file_name)
     except:
       pass
-    return listUrl  
+    
+    if len(list_urls):
+      url_shortened = [
+        (f"{urlparse(url).scheme}://{urlparse(url).netloc}/{'/'.join(list(filter(None, urlparse(url).path.split('/')[1:3])))}")
+        for url in list_urls
+      ]
+      list_urls = list(set(url_shortened))
+      list_urls.sort()
+
+    return list_urls

@@ -1,8 +1,9 @@
 import os
+import sys
 import bs4
 import requests
+from colorama import Back, Fore, Style
 from urllib.parse import urlparse, parse_qsl, unquote_plus
-
 from .constants import LinkStatus, UserCrawlType, AuthKeywords
 
 class Utils:
@@ -81,3 +82,65 @@ class Utils:
       return True
 
     return False
+
+  @staticmethod
+  def pager_input(lines, limit):
+    print("> The following links are likely to be the login link:")
+
+    len_first_page = limit if len(lines) >= limit else len(lines)
+
+    for i, line in enumerate(lines[0:len_first_page]):
+      print(f"  {i+1}. {line}")
+
+    if len(lines) <= limit:
+      c = input(
+        Back.WHITE +\
+        Fore.BLACK +\
+        f'\nSelect link to login (1-{i}) or 0 if you cannot find one:' +\
+        Style.RESET_ALL +\
+        ' '
+      )
+
+      if c.isdigit() and int(c) == 0:
+        return None
+      elif c.isdigit() and int(c) >= 1 and int(c) <= i:
+        return lines[int(c)-1]
+    else:
+      remaining_pages = lines[len_first_page:]
+      remaining_pages.append('')
+      for i, line in enumerate(remaining_pages):
+        i = limit + i
+        if i == len(lines) - 1:
+          print(
+            Back.WHITE +\
+            Fore.BLACK +\
+            'END OF LINKS' +\
+            Style.RESET_ALL
+          )
+          c = input(
+            Back.WHITE +\
+            Fore.BLACK +\
+            f'Output page line 1-{i}/{len(lines)-1} - Select link to login (1-{i}) / 0 or ENTER if you cannot find one:' +\
+            Style.RESET_ALL +\
+            ' '
+          )
+        else:
+          c = input(
+            Back.WHITE +\
+            Fore.BLACK +\
+            f'Output page line 1-{i}/{len(lines)-1} - Select link to login (1-{i}) / 0 if you cannot find one / ENTER to view more:' +\
+            Style.RESET_ALL +\
+            ' '
+          )
+
+        if c.isdigit() and int(c) == 0:
+          return None
+        elif c.isdigit() and int(c) >= 1 and int(c) <= i:
+          return lines[int(c)-1]
+        else:
+          if i != len(lines) - 1:
+            sys.stdout.write("\033[F")
+            sys.stdout.write("\033[K")
+            print(f"  {i+1}. {line}")
+          else:
+            return None
