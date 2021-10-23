@@ -4,8 +4,12 @@ from .db import Database
 from .utils import Utils
 from dotenv import load_dotenv
 from .dirsearch import Dirsearch
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 from .constants import TargetStatus, UserCrawlType
+import requests
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from queue import Queue
 
 class Project:
 
@@ -14,6 +18,14 @@ class Project:
     colorama.init()
     self.options = options
     self.db = Database()
+    self.internal_urls = set()
+    self.external_urls = set()
+    self.urls = Queue()
+    self.blacklist = ['logout', 'Logout', 'log out', 'Log out', 'thoat', 'Thoat', 'dangxuat', 'Dangxuat', 'dang xuat',
+                 'Dang xuat', 'logOut', 'LogOut', 'log Out', 'Log Out', 'dangXuat', 'DangXuat', 'dang Xuat',
+                 'Dang Xuat']
+    self.PATH = "C:\chromedriver.exe"
+    self.driver = webdriver.Chrome(self.PATH)
 
   # get arguments
   def get_args(self):
@@ -93,3 +105,128 @@ class Project:
       self.db.updateTarget(self.Target, { 'auth_url': auth_url })
 
     return auth_url   # None || found login link
+
+  # MODULE 2
+  def is_valid(self, url):
+    # check if url is valid
+    parsed = urlparse(url)
+    return bool(parsed.netloc) and bool(parsed.scheme)
+
+  def get_all_website_links(self, url):
+    # all URLs of `url`
+
+    # domain name of the URL without the protocol
+    domain_name = urlparse(url).netloc
+    soup = BeautifulSoup(requests.get(url).content, "html.parser")
+    for a_tag in soup.findAll("a"):
+      href = a_tag.attrs.get("href")
+      if href == "" or href is None:
+        # href empty tag
+        continue
+      # join the URL if it's relative (not absolute link)
+      href = urljoin(url, href)
+      parsed_href = urlparse(href)
+      # remove URL GET parameters, URL fragments, etc.
+      href = parsed_href.scheme + "://" + parsed_href.netloc + parsed_href.path
+      if "pdf" in urlparse(href).path:
+        self.internal_urls.add(href)
+        continue
+      if not self.is_valid(href):
+        # not a valid URL
+        continue
+      if href in self.internal_urls:
+        # already in the set
+        continue
+      # sua loi khi ten mien bi day ra khoi netloc(khac netloc)
+      if domain_name != urlparse(href).netloc:
+        # external link
+        if href not in self.external_urls:
+          self.external_urls.add(href)
+        continue
+      self.urls.put(href)
+      self.internal_urls.add(href)
+    return self.urls
+
+  def format_url(self):
+    formatted_url = set()
+    for url in self.internal_urls:
+      u = f"{urlparse(url).scheme}://{urlparse(url).netloc}/{'/'.join(list(filter(None, urlparse(url).path.split('/'))))}"
+      formatted_url.add(u)
+    return formatted_url
+
+  def crawl(self, url):
+    # crawl a web page and get all links
+    links = self.get_all_website_links(url)
+    while True:
+      # Open new Tab
+      print(links.qsize())
+      self.driver.execute_script('''window.open("");''')
+      self.driver.switch_to.window(self.driver.window_handles[1])
+      # Open the first link we found in new tab
+      new_link = links.get()
+      for word in self.blacklist:
+        if word in new_link:
+          continue
+      print(new_link)
+      self.driver.get(new_link)
+      # time.sleep(1)
+      # link we crawl can be different when open on browser
+      current_url_in_browser = self.driver.current_url
+      if current_url_in_browser != new_link:
+        if current_url_in_browser in self.format_url():
+          self.driver.close()
+          self.driver.switch_to.window(self.driver.window_handles[0])
+          if links.empty():
+            return
+          continue
+      else:
+        links = self.get_all_website_links(current_url_in_browser)
+        self.driver.close()
+        self.driver.switch_to.window(self.driver.window_handles[0])
+        if links.empty():
+          return
+        continue
+
+  def yes_no_question(self, question):
+    question = 'Are your sure you have logged in?'
+    answer = input(question + "(y/n): ").lower().strip()
+    print("")
+    while not (answer == "y" or answer == "yes" or
+               answer == "n" or answer == "no"):
+      print("Input (yes/y) or (no/n)")
+      answer = input(question + "(y/n):").lower().strip()
+    if answer[0] == "y":
+      return True
+    else:
+      return False
+
+  def module2(self):
+    if self.authen_url is None:
+      self.driver.get(self.start_url)
+      self.crawl(self.start_url)
+    else:
+      self.driver.get(self.authen_url)
+      while True:
+        question = 'Are your sure you have logged in?'
+        if self.yes_no_question(question):
+          self.driver.get(self.start_url)
+          self.crawl(self.start_url)
+        else:
+          self.driver.get(self.authen_url)
+          continue
+
+    print("Total Internal links:", len(self.internal_urls))
+    print("Total External links:", len(self.external_urls))
+    print("Total URLs:", len(self.external_urls) + len(self.internal_urls))
+
+    domain_name = urlparse(self.start_url).netloc
+
+    # save the internal links to a file
+    with open(f"{domain_name}_internal_links.txt", "w", encoding="utf-8") as f:
+      for internal_link in self.internal_urls:
+        print(internal_link.strip(), file=f)
+
+    # save the external links to a file
+    with open(f"{domain_name}_external_links.txt", "w", encoding="utf-8") as f:
+      for external_link in self.external_urls:
+        print(external_link.strip(), file=f)
