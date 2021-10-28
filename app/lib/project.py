@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from queue import Queue
 
+
 class Project:
 
   def __init__(self, options):
@@ -24,10 +25,8 @@ class Project:
     self.blacklist = ['logout', 'Logout', 'log out', 'Log out', 'thoat', 'Thoat', 'dangxuat', 'Dangxuat', 'dang xuat',
                  'Dang xuat', 'logOut', 'LogOut', 'log Out', 'Log Out', 'dangXuat', 'DangXuat', 'dang Xuat',
                  'Dang Xuat']
-    self.PATH = "C:\chromedriver.exe"
-    self.driver = webdriver.Chrome(self.PATH)
+# get arguments
 
-  # get arguments
   def get_args(self):
     return self.options
 
@@ -154,41 +153,40 @@ class Project:
       formatted_url.add(u)
     return formatted_url
 
-  def crawl(self, url):
+  def crawl(self, url, driver):
     # crawl a web page and get all links
     links = self.get_all_website_links(url)
     while True:
       # Open new Tab
-      print(links.qsize())
-      self.driver.execute_script('''window.open("");''')
-      self.driver.switch_to.window(self.driver.window_handles[1])
+      # print(links.qsize())
+      driver.execute_script('''window.open("");''')
+      driver.switch_to.window(driver.window_handles[1])
       # Open the first link we found in new tab
       new_link = links.get()
       for word in self.blacklist:
         if word in new_link:
           continue
-      print(new_link)
-      self.driver.get(new_link)
+      # print(new_link)
+      driver.get(new_link)
       # time.sleep(1)
-      # link we crawl can be different when open on browser
-      current_url_in_browser = self.driver.current_url
+      # link we crawl can be different when we open it on browser
+      current_url_in_browser = driver.current_url
       if current_url_in_browser != new_link:
         if current_url_in_browser in self.format_url():
-          self.driver.close()
-          self.driver.switch_to.window(self.driver.window_handles[0])
+          driver.close()
+          driver.switch_to.window(driver.window_handles[0])
           if links.empty():
             return
           continue
       else:
         links = self.get_all_website_links(current_url_in_browser)
-        self.driver.close()
-        self.driver.switch_to.window(self.driver.window_handles[0])
+        driver.close()
+        driver.switch_to.window(driver.window_handles[0])
         if links.empty():
           return
         continue
 
   def yes_no_question(self, question):
-    question = 'Are your sure you have logged in?'
     answer = input(question + "(y/n): ").lower().strip()
     print("")
     while not (answer == "y" or answer == "yes" or
@@ -200,33 +198,22 @@ class Project:
     else:
       return False
 
-  def module2(self):
-    if self.authen_url is None:
-      self.driver.get(self.start_url)
-      self.crawl(self.start_url)
+  def module2(self, authen_url, driver):
+    if authen_url is None:
+      driver.get(self.start_url)
+      self.crawl(self.start_url, driver)
     else:
-      self.driver.get(self.authen_url)
+      driver.get(authen_url)
       while True:
         question = 'Are your sure you have logged in?'
         if self.yes_no_question(question):
-          self.driver.get(self.start_url)
+          driver.get(self.start_url)
           self.crawl(self.start_url)
         else:
-          self.driver.get(self.authen_url)
+          driver.get(self.authen_url)
           continue
 
     print("Total Internal links:", len(self.internal_urls))
     print("Total External links:", len(self.external_urls))
     print("Total URLs:", len(self.external_urls) + len(self.internal_urls))
-
-    domain_name = urlparse(self.start_url).netloc
-
-    # save the internal links to a file
-    with open(f"{domain_name}_internal_links.txt", "w", encoding="utf-8") as f:
-      for internal_link in self.internal_urls:
-        print(internal_link.strip(), file=f)
-
-    # save the external links to a file
-    with open(f"{domain_name}_external_links.txt", "w", encoding="utf-8") as f:
-      for external_link in self.external_urls:
-        print(external_link.strip(), file=f)
+    return self.internal_urls
