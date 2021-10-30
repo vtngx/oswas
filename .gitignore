@@ -92,3 +92,4 @@ dirsearch
 .idea
 
 bin/*.txt
+bin/output

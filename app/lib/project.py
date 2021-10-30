@@ -23,8 +23,8 @@ class Project:
     colorama.init()
     self.options = options
     self.db = Database()
-    self.MAX_TRIES = 2
-    self.MAX_WAIT = 10
+    self.MAX_TRIES = 1
+    self.MAX_WAIT = 3
 
 
   # get arguments
@@ -75,10 +75,10 @@ class Project:
         parseUrl = tmp
 
       # find links using dirsearch
-      ds = Dirsearch(url, parseUrl)
-      ds._run()
-      ds_links = ds.getURL()
-      # ds_links = []
+      # ds = Dirsearch(url, parseUrl)
+      # ds._run()
+      # ds_links = ds.getURL()
+      ds_links = []
 
       if len(ds_links):
         # ask user to find login_url from list
@@ -156,6 +156,9 @@ class Project:
 
   def crawl_from_forms(self, driver):
     form_spider = FormSpider(self.MAX_TRIES, self.MAX_WAIT, driver)
+    selects = []
+    inputs = []
+    textareas = []
 
     # find inputs/textareas/selects
     selects = form_spider.find_elements_select()
@@ -203,18 +206,17 @@ class Project:
 
     # only run when at least 1 new tab is opened
     if len(open_tabs) > 1:
-      for i in range(len(open_tabs)-1, 0, -1):
+      for i in range(len(open_tabs)-1, 1, -1):
         driver.switch_to.window(driver.window_handles[i])
         self.urls.put(driver.current_url)
         self.internal_urls.add(driver.current_url)
         driver.close()
-      driver.switch_to.window(driver.window_handles[0])
+      driver.switch_to.window(driver.window_handles[1])
 
   def crawl(self, url, driver):
     # crawl a web page and get all links
     links = self.get_all_website_links(url)
     while True:
-      self.crawl_from_forms(driver)
       
       # Open new Tab
       driver.execute_script('''window.open("");''')
@@ -228,6 +230,7 @@ class Project:
           continue
       
       driver.get(new_link)
+      self.crawl_from_forms(driver)
 
       # redirected link handler
       current_url_in_browser = driver.current_url

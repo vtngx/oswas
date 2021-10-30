@@ -22,7 +22,7 @@ class FormSpider:
         selects = WebDriverWait(self.driver, self.max_wait).until(
           EC.presence_of_all_elements_located((
             By.CSS_SELECTOR,
-            'select'
+            'form select'
           )),
         )
         return selects
@@ -39,7 +39,7 @@ class FormSpider:
         inputs = WebDriverWait(self.driver, self.max_wait).until(
           EC.presence_of_all_elements_located((
             By.CSS_SELECTOR,
-            'input[type]:not([type=hidden]):not([type=submit]):not([hidden])'
+            'form input[type]:not([type=hidden]):not([type=submit]):not([hidden])'
           )),
         )
         return inputs
@@ -56,7 +56,7 @@ class FormSpider:
         textareas = WebDriverWait(self.driver, self.max_wait).until(
           EC.presence_of_all_elements_located((
             By.CSS_SELECTOR,
-            'textarea'
+            'form textarea'
           )),
         )
         return textareas
@@ -84,23 +84,26 @@ class FormSpider:
         n += 1
 
   def fill_select(self, select_element):
-    [name, id] = [
-      select_element.get_attribute('name'),
-      select_element.get_attribute('id')
-    ]
+    try:
+      [name, id] = [
+        select_element.get_attribute('name'),
+        select_element.get_attribute('id')
+      ]
 
-    if name:
-      selector = (By.NAME, name)
-    elif id:
-      selector = (By.ID, id)
+      if name:
+        selector = (By.NAME, name)
+      elif id:
+        selector = (By.ID, id)
 
-    if selector:
-      select_element = WebDriverWait(self.driver, self.max_wait).until(
-        EC.element_to_be_clickable(selector)
-      )
+      if selector:
+        select_element = WebDriverWait(self.driver, self.max_wait).until(
+          EC.element_to_be_clickable(selector)
+        )
 
-    s = Select(select_element)
-    s.select_by_index(1)
+      s = Select(select_element)
+      s.select_by_index(1)
+    except: 
+      pass
 
   def fill_input(self, input_element):
     try:
@@ -237,19 +240,22 @@ class FormSpider:
       pass
 
   def fill_textarea(self, textarea_element):
-    [name, id] = [
-      textarea_element.get_attribute('name'),
-      textarea_element.get_attribute('id')
-    ]
+    try:
+      [name, id] = [
+        textarea_element.get_attribute('name'),
+        textarea_element.get_attribute('id')
+      ]
 
-    if name:
-      selector = (By.NAME, name)
-    elif id:
-      selector = (By.ID, id)
+      if name:
+        selector = (By.NAME, name)
+      elif id:
+        selector = (By.ID, id)
 
-    if selector:
-      textarea_element = WebDriverWait(self.driver, self.max_wait).until(
-        EC.visibility_of_element_located(selector)
-      )
+      if selector:
+        textarea_element = WebDriverWait(self.driver, self.max_wait).until(
+          EC.visibility_of_element_located(selector)
+        )
 
-    textarea_element.send_keys(('textarea'))
+      textarea_element.send_keys(('textarea'))
+    except:
+      pass

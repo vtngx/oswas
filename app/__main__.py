@@ -5,6 +5,9 @@ from selenium import webdriver
 from lib import Project, Options
 from multiprocessing import Process
 from multiprocessing.pool import ThreadPool
+import subprocess
+import os
+from pathlib import Path
 
 
 def main():
@@ -61,9 +64,36 @@ def main():
   #   crawl using admin
   # 
 
+  #set up proxy for firefox
+  directory = Path('output')
+  directory.mkdir(exist_ok=True)
+
+  os.chdir(f'./{directory}')
+
+  script_path = "/home/kali/Desktop/Capstone/oswas/app/lib"
+  cmd = f'qterminal -e mitmdump -s {script_path}/save_respone.py'
+  mitmproxy = subprocess.Popen(cmd, shell=True)
+
+
+  proxy = '127.0.0.1:8080'
+
+  firefox_capabilities = webdriver.DesiredCapabilities.FIREFOX
+  firefox_capabilities['marionette'] = True
+
+  firefox_capabilities['proxy'] = {
+        "proxyType": "MANUAL",
+        "httpProxy": proxy,
+        "sslProxy": proxy,
+        "socksProxy": proxy,
+        "socksVersion": 5
+  }   
+  firefox_capabilities['acceptInsecureCerts'] = True
+  firefox_capabilities['acceptSslCerts'] = True
+  
+
   # crawl no authen
   if auth_url is None:
-    res_noauth = project.start_crawler(webdriver.Firefox())
+    res_noauth = project.start_crawler(webdriver.Firefox(capabilities=firefox_capabilities))
   else:
     driver_user_1 = webdriver.Firefox()
     if project.prompt_login(auth_url, driver_user_1):
@@ -89,6 +119,7 @@ def main():
   print('crawl user 1:', len(res_user_1['internal_urls']))
   print('crawl user 2:', len(res_user_2['internal_urls']))
   print('crawl admin:' , len(res_admin['internal_urls']))
+  os.kill(int(mitmproxy.pid), 0)
 
 
 if __name__ == "__main__":
