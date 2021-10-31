@@ -217,7 +217,6 @@ class Project:
     # crawl a web page and get all links
     links = self.get_all_website_links(url)
     while True:
-      
       # Open new Tab
       driver.execute_script('''window.open("");''')
       driver.switch_to.window(driver.window_handles[1])
@@ -238,7 +237,25 @@ class Project:
         if current_url_in_browser not in Utils.format_urls(self.internal_urls):
           links.put(current_url_in_browser)
       else:
-        links = self.get_all_website_links(current_url_in_browser)
+        links = self.get_all_website_links(current_url_in_browser)     
+
+      # TODO - QUAN: mapping traffic files to url
+      # 
+      # hiện tại trafic files bắt được từ proxy đang lưu trong folder /bin/tmp
+      # viết function tạo các folder để lưu traffic file của từng link đang crawl
+      # 
+      # STEPS:
+      # tạo 1 folder mới /output 
+      #   -> trong follder /output tạo folder (để tên là link đang crawl)
+      #   -> chuyển tất cả traffic file từ folder /tmp sang folder mới này
+      #   -> xóa hết trong folder tmp
+      # 
+      # VD:
+      # crawl www.fstudiobyfpt.com -> chuyển traffic từ /tmp -> folder /output/www.fstudiobyfpt.com -> xóa hết trong /tmp
+      # crawl www.fstudiobyfpt.com/ipad -> chuyển traffic từ /tmp -> folder /output/www.fstudiobyfpt.com\ipad -> xóa hết trong /tmp
+      # crawl www.fstudiobyfpt.com/iphone -> chuyển traffic từ /tmp -> folder /output/www.fstudiobyfpt.com\iphone -> xóa hết trong /tmp
+      # crawl www.fstudiobyfpt.com/macbook -> chuyển traffic từ /tmp -> folder /output/www.fstudiobyfpt.com\macbook -> xóa hết trong /tmp
+
 
       driver.close()
       driver.switch_to.window(driver.window_handles[0])

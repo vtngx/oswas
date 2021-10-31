@@ -65,7 +65,7 @@ def main():
   # 
 
   #set up proxy for firefox
-  directory = Path('output')
+  directory = Path('tmp')
   directory.mkdir(exist_ok=True)
 
   os.chdir(f'./{directory}')
