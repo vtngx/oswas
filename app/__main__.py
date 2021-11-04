@@ -70,7 +70,7 @@ def main():
 
   os.chdir(f'./{directory}')
 
-  script_path = "/home/kali/Desktop/Capstone/oswas/app/lib"
+  script_path = "/home/quan/Desktop/oswas/app/lib"
   cmd = f'qterminal -e mitmdump -s {script_path}/save_respone.py'
   mitmproxy = subprocess.Popen(cmd, shell=True)
 

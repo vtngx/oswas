@@ -15,6 +15,8 @@ from selenium.webdriver.common.keys import Keys
 from .constants import TargetStatus, UserCrawlType
 from selenium.webdriver.common.action_chains import ActionChains
 
+#Quan import
+import shutil
 
 class Project:
 
@@ -222,6 +224,7 @@ class Project:
       driver.switch_to.window(driver.window_handles[1])
 
       # Open the first link we found in new tab
+      # new_link la ten folder dang crawl
       new_link = links.get()
 
       for word in BLACKLIST:
@@ -245,7 +248,7 @@ class Project:
       # viết function tạo các folder để lưu traffic file của từng link đang crawl
       # 
       # STEPS:
-      # tạo 1 folder mới /output 
+      # tạo 1 folder mới bin/output 
       #   -> trong follder /output tạo folder (để tên là link đang crawl)
       #   -> chuyển tất cả traffic file từ folder /tmp sang folder mới này
       #   -> xóa hết trong folder tmp
@@ -256,6 +259,40 @@ class Project:
       # crawl www.fstudiobyfpt.com/iphone -> chuyển traffic từ /tmp -> folder /output/www.fstudiobyfpt.com\iphone -> xóa hết trong /tmp
       # crawl www.fstudiobyfpt.com/macbook -> chuyển traffic từ /tmp -> folder /output/www.fstudiobyfpt.com\macbook -> xóa hết trong /tmp
 
+      # Chuyen "new_link" sang String
+      #  => Cover nhung "new_link" co "/" sang "\"
+      #  => Neu co "https://" hoac "http://" thi Delete chung
+
+      folderOutput = str(new_link)
+      folderOutput = folderOutput.replace("/","SLASH")
+ 
+      parent_dir = "/home/quan/Desktop/oswas/bin/output"
+
+
+      # Path
+      path = os.path.join(parent_dir,folderOutput)
+
+
+      os.makedirs(path, exist_ok=True)
+      
+      
+      # Copy folder /tmp/new_link to /output/new_link
+   
+      source_folder = r"/home/quan/Desktop/oswas/bin/tmp/"+ new_link + "\\"
+      destination_folder = r"/home/quan/Desktop/oswas/bin/output/"+ folderOutput +"\\"
+
+      os.chdir("../")
+      #print(os.getcwd())
+      
+      #https://github.com/
+
+      try:
+        os.system(f"mv ./tmp/* ./output/{folderOutput}")           
+
+
+      except Exception as e: print(e)
+    
+      os.chdir("tmp")
 
       driver.close()
       driver.switch_to.window(driver.window_handles[0])
@@ -284,7 +321,7 @@ class Project:
     self.external_urls = set()
     self.urls = Queue()
 
-    driver.maximize_window()
+    #driver.maximize_window()
     driver.get(self.start_url)
     self.crawl(self.start_url, driver)
     driver.close()
