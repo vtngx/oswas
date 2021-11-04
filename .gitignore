@@ -93,3 +93,4 @@ dirsearch
 
 bin/*.txt
 bin/output
+bin/tmp

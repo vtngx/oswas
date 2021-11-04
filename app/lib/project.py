@@ -15,9 +15,6 @@ from selenium.webdriver.common.keys import Keys
 from .constants import TargetStatus, UserCrawlType
 from selenium.webdriver.common.action_chains import ActionChains
 
-#Quan import
-import shutil
-
 class Project:
 
   def __init__(self, options):
@@ -167,9 +164,9 @@ class Project:
     inputs = form_spider.find_elements_input()
     textareas = form_spider.find_elements_textarea()
 
-    print(f'> {len(selects)} selects')
-    print(f'> {len(inputs)} inputs')
-    print(f'> {len(textareas)} textareas')
+    # print(f'> {len(selects)} selects')
+    # print(f'> {len(inputs)} inputs')
+    # print(f'> {len(textareas)} textareas')
 
     elements_to_fill = \
       list(map(WebElementObj.web_ele_2_select, selects)) + \
@@ -197,17 +194,20 @@ class Project:
     # open each form to new tabs
     for submit_element in submits:
       if submit_element.is_enabled() and submit_element.is_displayed():
-        ActionChains(driver)\
-          .key_down(Keys.CONTROL)\
-          .click(submit_element)\
-          .key_up(Keys.CONTROL)\
-          .perform()
+        try:
+          ActionChains(driver)\
+            .key_down(Keys.CONTROL)\
+            .click(submit_element)\
+            .key_up(Keys.CONTROL)\
+            .perform()
+        except:
+          pass
     
     # get number of open tabs
     open_tabs = driver.window_handles
 
     # only run when at least 1 new tab is opened
-    if len(open_tabs) > 1:
+    if len(open_tabs) > 2:
       for i in range(len(open_tabs)-1, 1, -1):
         driver.switch_to.window(driver.window_handles[i])
         self.urls.put(driver.current_url)
@@ -215,7 +215,11 @@ class Project:
         driver.close()
       driver.switch_to.window(driver.window_handles[1])
 
+
   def crawl(self, url, driver):
+    # remove redundant files im /tmp
+    os.system("rm -rf *")
+
     # crawl a web page and get all links
     links = self.get_all_website_links(url)
     while True:
@@ -242,60 +246,19 @@ class Project:
       else:
         links = self.get_all_website_links(current_url_in_browser)     
 
-      # TODO - QUAN: mapping traffic files to url
-      # 
-      # hiện tại trafic files bắt được từ proxy đang lưu trong folder /bin/tmp
-      # viết function tạo các folder để lưu traffic file của từng link đang crawl
-      # 
-      # STEPS:
-      # tạo 1 folder mới bin/output 
-      #   -> trong follder /output tạo folder (để tên là link đang crawl)
-      #   -> chuyển tất cả traffic file từ folder /tmp sang folder mới này
-      #   -> xóa hết trong folder tmp
-      # 
-      # VD:
-      # crawl www.fstudiobyfpt.com -> chuyển traffic từ /tmp -> folder /output/www.fstudiobyfpt.com -> xóa hết trong /tmp
-      # crawl www.fstudiobyfpt.com/ipad -> chuyển traffic từ /tmp -> folder /output/www.fstudiobyfpt.com\ipad -> xóa hết trong /tmp
-      # crawl www.fstudiobyfpt.com/iphone -> chuyển traffic từ /tmp -> folder /output/www.fstudiobyfpt.com\iphone -> xóa hết trong /tmp
-      # crawl www.fstudiobyfpt.com/macbook -> chuyển traffic từ /tmp -> folder /output/www.fstudiobyfpt.com\macbook -> xóa hết trong /tmp
-
-      # Chuyen "new_link" sang String
-      #  => Cover nhung "new_link" co "/" sang "\"
-      #  => Neu co "https://" hoac "http://" thi Delete chung
-
-      folderOutput = str(new_link)
-      folderOutput = folderOutput.replace("/","SLASH")
- 
-      parent_dir = "/home/quan/Desktop/oswas/bin/output"
-
-
-      # Path
+      # mapping link - traffic files
+      folderOutput = str(new_link).replace("/","SLASH")
+      parent_dir = "../output"
       path = os.path.join(parent_dir,folderOutput)
 
-
       os.makedirs(path, exist_ok=True)
-      
-      
-      # Copy folder /tmp/new_link to /output/new_link
-   
-      source_folder = r"/home/quan/Desktop/oswas/bin/tmp/"+ new_link + "\\"
-      destination_folder = r"/home/quan/Desktop/oswas/bin/output/"+ folderOutput +"\\"
-
       os.chdir("../")
-      #print(os.getcwd())
-      
-      #https://github.com/
-
-      try:
-        os.system(f"mv ./tmp/* ./output/{folderOutput}")           
-
-
-      except Exception as e: print(e)
-    
+      os.system(f"mv ./tmp/* ./output/{folderOutput}")
       os.chdir("tmp")
-
+      
       driver.close()
       driver.switch_to.window(driver.window_handles[0])
+      print(f"DONE | {new_link}")
       if links.empty():
         return
 
@@ -321,7 +284,6 @@ class Project:
     self.external_urls = set()
     self.urls = Queue()
 
-    #driver.maximize_window()
     driver.get(self.start_url)
     self.crawl(self.start_url, driver)
     driver.close()
