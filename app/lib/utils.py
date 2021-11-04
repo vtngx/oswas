@@ -7,7 +7,6 @@ from urllib.parse import urlparse, parse_qsl, unquote_plus
 from .constants import LinkStatus, UserCrawlType, AuthKeywords
 
 class Utils:
-  # def __init__(self):
 
   @staticmethod
   def eq_urls(url1, url2):
@@ -29,7 +28,7 @@ class Utils:
       "url": url,
       "auth": auth,
       "user": user,
-      "traffic_file": None,
+      "traffic_file": traffic_file or None,
       "status": LinkStatus.TODO
     }
 
@@ -144,3 +143,36 @@ class Utils:
             print(f"  {i+1}. {line}")
           else:
             return None
+  
+  @staticmethod
+  def is_url_valid(url):
+    # check if url is valid
+    parsed = urlparse(url)
+    return bool(parsed.netloc) and bool(parsed.scheme)
+
+  @staticmethod
+  def format_url(url):
+      return f"{urlparse(url).scheme}://{urlparse(url).netloc}/{'/'.join(list(filter(None, urlparse(url).path.split('/'))))}"
+
+  @staticmethod
+  def format_urls(list_urls):
+    formatted_url = set()
+
+    for url in list_urls:
+      u = f"{urlparse(url).scheme}://{urlparse(url).netloc}/{'/'.join(list(filter(None, urlparse(url).path.split('/'))))}"
+      formatted_url.add(u)
+
+    return formatted_url
+
+  @staticmethod
+  def yes_no_question(question):
+    answer = input(question + "(y/n): ").lower().strip()
+    print("")
+    while not (answer == "y" or answer == "yes" or
+               answer == "n" or answer == "no"):
+      print("Input (yes/y) or (no/n)")
+      answer = input(question + "(y/n):").lower().strip()
+    if answer[0] == "y":
+      return True
+    else:
+      return False
