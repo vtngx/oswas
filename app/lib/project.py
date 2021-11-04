@@ -74,10 +74,10 @@ class Project:
         parseUrl = tmp
 
       # find links using dirsearch
-      # ds = Dirsearch(url, parseUrl)
-      # ds._run()
-      # ds_links = ds.getURL()
-      ds_links = []
+      ds = Dirsearch(url, parseUrl)
+      ds._run()
+      ds_links = ds.getURL()
+      # ds_links = []
 
       if len(ds_links):
         # ask user to find login_url from list
