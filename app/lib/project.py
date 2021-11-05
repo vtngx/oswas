@@ -14,6 +14,9 @@ from urllib.parse import urlparse, urljoin
 from selenium.webdriver.common.keys import Keys
 from .constants import TargetStatus, UserCrawlType
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
 
 class Project:
 
@@ -110,14 +113,18 @@ class Project:
 
 
   # MODULE 2
-  def get_all_website_links(self, url):
-    # all URLs of `url`
+  def get_all_website_links(self, url, driver):
     # domain name of the URL without the protocol
     domain_name = urlparse(url).netloc
-    soup = BeautifulSoup(requests.get(url).content, "html.parser")
+    try:
+      all_a_tags = WebDriverWait(driver, 10).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a"))
+      )
+    except:
+      pass
 
-    for a_tag in soup.findAll("a"):
-      href = a_tag.attrs.get("href")
+    for a_tag in all_a_tags:
+      href = a_tag.get_attribute("href")
 
       if href == "" or href is None:
         # href empty tag
@@ -221,7 +228,7 @@ class Project:
     os.system("rm -rf *")
 
     # crawl a web page and get all links
-    links = self.get_all_website_links(url)
+    links = self.get_all_website_links(url, driver)
     while True:
       # Open new Tab
       driver.execute_script('''window.open("");''')
@@ -244,7 +251,7 @@ class Project:
         if current_url_in_browser not in Utils.format_urls(self.internal_urls):
           links.put(current_url_in_browser)
       else:
-        links = self.get_all_website_links(current_url_in_browser)     
+        links = self.get_all_website_links(current_url_in_browser, driver)
 
       # mapping link - traffic files
       folderOutput = str(new_link).replace("/","SLASH")
