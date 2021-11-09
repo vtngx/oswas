@@ -1,22 +1,21 @@
 import os
 import colorama
-import requests
 from queue import Queue
 from .db import Database
 from .utils import Utils
-from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from .dirsearch import Dirsearch
 from .constants import BLACKLIST
+from bson.objectid import ObjectId
 from .form_spider import FormSpider
 from .web_element import WebElementObj
 from urllib.parse import urlparse, urljoin
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from .constants import TargetStatus, UserCrawlType
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
 
 class Project:
 
@@ -25,6 +24,8 @@ class Project:
     colorama.init()
     self.options = options
     self.db = Database()
+    self.Target = None
+    self.auth_url = None
     self.MAX_TRIES = 1
     self.MAX_WAIT = 3
 
@@ -43,7 +44,7 @@ class Project:
       self.Target = self.db.createTarget({
         "start_url": self.start_url,
         "auth_url": None,
-        "domain": "",
+        "domain": urlparse(self.start_url).netloc,
         "status": TargetStatus.DOING,
       })
 
@@ -61,14 +62,6 @@ class Project:
     
     if choice.lower() == 'y':
       auth_url = input('?> Please enter login page: ')
-
-      # add Links to DB
-      if (Utils.eq_urls(url, auth_url)):
-        link_db = Utils.linkToDbObject(url, True, UserCrawlType.USER1)
-        self.db.createLink(link_db)
-      else:
-        links_db = [url, auth_url]
-        self.db.createLinksMulti(Utils.linksToDbObjectList(links_db, True, UserCrawlType.USER1))
     elif choice.lower() == 'n':
       tmp = urlparse(url).netloc
       if tmp == '':
@@ -80,33 +73,20 @@ class Project:
       ds = Dirsearch(url, parseUrl)
       ds._run()
       ds_links = ds.getURL()
-      # ds_links = []
 
       if len(ds_links):
         # ask user to find login_url from list
         auth_url = Utils.pager_input(ds_links, 20)
-      
-        if auth_url:
-          ds_links.append(url)
-
-          # add Links to DB
-          links_db = Utils.linksToDbObjectList(ds_links, True, UserCrawlType.USER1)
-        else:
-          # add Links to DB
-          links_db = Utils.linksToDbObjectList(ds_links)
-
-          # check if start_url is auth_link
-          if Utils.check_authlink(url):
-            auth_url = url
-
-        self.db.createLinksMulti(links_db)
       else:
         print("!> dirsearch did not find any links")
+
+        # check if start_url is auth_url
         if Utils.check_authlink(url):
           auth_url = url
     
+    # update auth_url of Target
     if auth_url:
-      # update uth_url of Target
+      self.auth_url = auth_url
       self.db.updateTarget(self.Target, { 'auth_url': auth_url })
 
     return auth_url   # returns None or login link
@@ -121,12 +101,16 @@ class Project:
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a"))
       )
     except:
-      pass
+      all_a_tags = []
 
     for a_tag in all_a_tags:
-      href = a_tag.get_attribute("href")
+      try:
+        href = a_tag.get_attribute("href")
+      except Exception as e:
+      #   print(e)
+        pass
 
-      if href == "" or href is None:
+      if not href:
         # href empty tag
         continue
 
@@ -170,10 +154,6 @@ class Project:
     selects = form_spider.find_elements_select()
     inputs = form_spider.find_elements_input()
     textareas = form_spider.find_elements_textarea()
-
-    # print(f'> {len(selects)} selects')
-    # print(f'> {len(inputs)} inputs')
-    # print(f'> {len(textareas)} textareas')
 
     elements_to_fill = \
       list(map(WebElementObj.web_ele_2_select, selects)) + \
@@ -222,84 +202,88 @@ class Project:
         driver.close()
       driver.switch_to.window(driver.window_handles[1])
 
-
-  def crawl(self, url, driver):
+  def crawl(self, url, driver, userType):
     # remove redundant files im /tmp
     os.system("rm -rf *")
+    os.mkdir(f"../output/{self.Target}")
 
     # crawl a web page and get all links
     links = self.get_all_website_links(url, driver)
-    while True:
-      # Open new Tab
-      driver.execute_script('''window.open("");''')
-      driver.switch_to.window(driver.window_handles[1])
 
+    while True:
       # Open the first link we found in new tab
       # new_link la ten folder dang crawl
       new_link = links.get()
+      print(f"CRAWL | {new_link}")
 
+      blacked = False
       for word in BLACKLIST:
         if word in new_link:
-          continue
+          blacked = True
+      if blacked: continue
+
+      try:
+        # Open new Tab
+        driver.execute_script('''window.open("");''')
+        driver.switch_to.window(driver.window_handles[1])
       
-      driver.get(new_link)
-      self.crawl_from_forms(driver)
+        driver.get(new_link)
+        self.crawl_from_forms(driver)
 
-      # redirected link handler
-      current_url_in_browser = driver.current_url
-      if current_url_in_browser != new_link:
-        if current_url_in_browser not in Utils.format_urls(self.internal_urls):
-          links.put(current_url_in_browser)
-      else:
-        links = self.get_all_website_links(current_url_in_browser, driver)
+        # redirected link handler
+        current_url_in_browser = driver.current_url
+        if current_url_in_browser != new_link:
+          if current_url_in_browser not in Utils.format_urls(self.internal_urls):
+            links.put(current_url_in_browser)
+        else:
+          links = self.get_all_website_links(current_url_in_browser, driver)
 
-      # mapping link - traffic files
-      folderOutput = str(new_link).replace("/","SLASH")
-      parent_dir = "../output"
-      path = os.path.join(parent_dir,folderOutput)
+        driver.close()
 
-      os.makedirs(path, exist_ok=True)
-      os.chdir("../")
-      os.system(f"mv ./tmp/* ./output/{folderOutput}")
-      os.chdir("tmp")
-      
-      driver.close()
-      driver.switch_to.window(driver.window_handles[0])
-      print(f"DONE | {new_link}")
+        # mapping link - traffic files
+        new_link_id = ObjectId()
+        traffic_path = Utils.map_link_traffic(new_link, str( self.Target), str(new_link_id))
+        self.db_links.append({
+          "_id": new_link_id,
+          "url": new_link,
+          "user": userType,
+          "traffic_file": traffic_path,
+        })
+
+        if len(self.db_links) == 100:
+          self.db.createLinksMulti(self.db_links)
+          self.db_links = []
+        
+        driver.switch_to.window(driver.window_handles[0])
+        print(f"DONE | {new_link}")
+        self.done_links.append(new_link)
+      except Exception as e:
+        # print(e)
+        print(f"FAIL | {new_link}")
+
       if links.empty():
+        self.db.createLinksMulti(self.db_links)
+        self.db.updateTarget(self.Target, { 'status': TargetStatus.DONE })
         return
 
 
-  def prompt_login(self, authen_url, driver):
-    success = False
-    if not authen_url is None:
-      # open authen_url to login
-      driver.get(authen_url)
-      
-      while True:
-        if Utils.yes_no_question('?> Please confirm if you have logged in '):
-          success = True
-          break
-        else:
-          driver.get(authen_url)
-
-    return success
-
-
-  def start_crawler(self, driver):
+  def start_crawler(self, driver, userType: UserCrawlType):
     self.internal_urls = set()
     self.external_urls = set()
     self.urls = Queue()
+    self.done_links = []
+    self.db_links = []
+
+    if self.auth_url and not Utils.eq_urls(self.auth_url, self.start_url):
+      self.db_links.append({
+        "_id": ObjectId(),
+        "url": self.auth_url,
+        "user": userType,
+        "traffic_file": None,
+      })
 
     driver.get(self.start_url)
-    self.crawl(self.start_url, driver)
+    self.crawl(self.start_url, driver, userType)
     driver.close()
-    
-    # print("Total Internal links:", len(self.internal_urls))
-    # print("Total External links:", len(self.external_urls))
-    # print("Total URLs:", len(self.external_urls) + len(self.internal_urls))
 
-    return dict({
-      'internal_urls': self.internal_urls,
-      'external_urls': self.external_urls,
-    })
+    return self.done_links

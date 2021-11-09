@@ -1,13 +1,11 @@
+import os
 import sys
-import threading
+import subprocess
+from pathlib import Path
 from lib.utils import Utils
 from selenium import webdriver
 from lib import Project, Options
-from multiprocessing import Process
-from multiprocessing.pool import ThreadPool
-import subprocess
-import os
-from pathlib import Path
+from lib.constants import UserCrawlType
 
 
 def main():
@@ -43,8 +41,9 @@ def main():
 
   os.chdir(f'./{directory}')
 
-  script_path = "/home/kali/Desktop/Capstone/oswas/app/lib"
-  cmd = f'qterminal -e mitmdump -s {script_path}/save_respone.py --mode upstream:http://127.0.0.1:8888 --ssl-insecure'
+  script_path = "/home/vtngx/oswas/app/lib"
+  # cmd = f'qterminal -e mitmdump -s {script_path}/save_respone.py --mode upstream:http://127.0.0.1:8888 --ssl-insecure'
+  cmd = f'qterminal -e mitmdump -s {script_path}/save_respone.py --ssl-insecure'
   mitmproxy = subprocess.Popen(cmd, shell=True)
 
   proxy = '127.0.0.1:8080'
@@ -64,12 +63,21 @@ def main():
 
   # crawl no authen
   if auth_url is None:
-    res_noauth = project.start_crawler(webdriver.Firefox(capabilities=firefox_capabilities))
+    res_noauth = project.start_crawler(
+      webdriver.Firefox(capabilities=firefox_capabilities),
+      UserCrawlType.NO_AUTH
+    )
   else:
     driver_user_1 = webdriver.Firefox(capabilities=firefox_capabilities)
-    if project.prompt_login(auth_url, driver_user_1):
-      res_user_1 = project.start_crawler(driver_user_1)
-      res_noauth = project.start_crawler(webdriver.Firefox(capabilities=firefox_capabilities))
+    if Utils.prompt_login(auth_url, driver_user_1):
+      res_user_1 = project.start_crawler(
+        driver_user_1,
+        UserCrawlType.USER1
+      )
+      res_noauth = project.start_crawler(
+        webdriver.Firefox(capabilities=firefox_capabilities),
+        UserCrawlType.NO_AUTH
+      )
 
       has_user_2 = Utils.yes_no_question('> Do you have another user account?')
       has_admin = Utils.yes_no_question('> Do you have an admin account?')
@@ -77,21 +85,27 @@ def main():
       # crawl with user 2
       if has_user_2:
         driver_user_2 = webdriver.Firefox(capabilities=firefox_capabilities)
-        if project.prompt_login(auth_url, driver_user_2):
-          res_user_2 = project.start_crawler(driver_user_2)
+        if Utils.prompt_login(auth_url, driver_user_2):
+          res_user_2 = project.start_crawler(
+            driver_user_2,
+            UserCrawlType.USER2
+          )
 
       # crawl with admin
       if has_admin:
         driver_admin = webdriver.Firefox(capabilities=firefox_capabilities)
-        if project.prompt_login(auth_url, driver_admin):
-          res_admin = project.start_crawler(driver_admin)
+        if Utils.prompt_login(auth_url, driver_admin):
+          res_admin = project.start_crawler(
+            driver_admin,
+            UserCrawlType.ADMIN
+          )
 
 
   # crawler results
-  if res_noauth: links_noauth = res_noauth['internal_urls']
-  if res_user_1: links_user_1 = res_user_1['internal_urls']
-  if res_user_2: links_user_2 = res_user_2['internal_urls']
-  if res_admin: links_admin = res_admin['internal_urls']
+  if res_noauth: links_noauth = res_noauth
+  if res_user_1: links_user_1 = res_user_1
+  if res_user_2: links_user_2 = res_user_2
+  if res_admin: links_admin = res_admin
 
   print('crawl noauth:', len(links_noauth) or 0)
   print('crawl user 1:', len(links_user_1) or 0)

@@ -3,8 +3,8 @@ import sys
 import bs4
 import requests
 from colorama import Back, Fore, Style
+from .constants import UserCrawlType, AuthKeywords
 from urllib.parse import urlparse, parse_qsl, unquote_plus
-from .constants import LinkStatus, UserCrawlType, AuthKeywords
 
 class Utils:
 
@@ -23,25 +23,21 @@ class Utils:
     return url1_parts == url2_parts
 
   @staticmethod
-  def linkToDbObject(url, auth=False, user=UserCrawlType.NO_AUTH, traffic_file=None, status=LinkStatus.TODO):
+  def linkToDbObj(url, from_url, user=UserCrawlType.NO_AUTH, traffic_file=None):
     return {
       "url": url,
-      "auth": auth,
       "user": user,
       "traffic_file": traffic_file or None,
-      "status": LinkStatus.TODO
     }
 
   @staticmethod
-  def linksToDbObjectList(urls, auth=False, user=UserCrawlType.NO_AUTH, traffic_file=None, status=LinkStatus.TODO):
+  def linksToDbObjList(urls, user=UserCrawlType.NO_AUTH, traffic_file=None):
     list = []
     for url in urls:
       list.append({
         "url": url,
-        "auth": auth,
         "user": user,
         "traffic_file": None,
-        "status": LinkStatus.TODO
       })
     return list
 
@@ -176,3 +172,32 @@ class Utils:
       return True
     else:
       return False
+
+  @staticmethod
+  def prompt_login(authen_url, driver):
+    success = False
+    if not authen_url is None:
+      # open authen_url to login
+      driver.get(authen_url)
+      
+      while True:
+        if Utils.yes_no_question('?> Please confirm if you have logged in '):
+          success = True
+          break
+        else:
+          driver.get(authen_url)
+
+    return success
+
+  @staticmethod
+  def map_link_traffic(link, target_id, output_dir):
+    # folderOutput = str(link).replace("/","SLASH")
+    parent_dir = f"../output/{target_id}"
+    path = os.path.join(parent_dir, output_dir)
+
+    os.makedirs(path, exist_ok=True)
+    os.chdir("../")
+    os.system(f"mv ./tmp/* ./output/{target_id}/{output_dir}")
+    os.chdir("tmp")
+
+    return f"./output/{target_id}/{output_dir}"
