@@ -47,6 +47,7 @@ class Project:
         "domain": urlparse(self.start_url).netloc,
         "status": TargetStatus.DOING,
       })
+      os.mkdir(f"output/{self.Target}")
 
 
   # MODULE 1
@@ -145,67 +146,70 @@ class Project:
 
 
   def crawl_from_forms(self, driver):
-    form_spider = FormSpider(self.MAX_TRIES, self.MAX_WAIT, driver)
-    selects = []
-    inputs = []
-    textareas = []
+    try:
+      form_spider = FormSpider(self.MAX_TRIES, self.MAX_WAIT, driver)
+      selects = []
+      inputs = []
+      textareas = []
 
-    # find inputs/textareas/selects
-    selects = form_spider.find_elements_select()
-    inputs = form_spider.find_elements_input()
-    textareas = form_spider.find_elements_textarea()
+      # find inputs/textareas/selects
+      selects = form_spider.find_elements_select()
+      inputs = form_spider.find_elements_input()
+      textareas = form_spider.find_elements_textarea()
 
-    elements_to_fill = \
-      list(map(WebElementObj.web_ele_2_select, selects)) + \
-      list(map(WebElementObj.web_ele_2_input, inputs)) + \
-      list(map(WebElementObj.web_ele_2_textarea, textareas))
-    
-    for element in elements_to_fill:
-      # fill select boxes
-      if element.type == 'select':
-        select = element.element
-        form_spider.fill_select(select)
-      # fill inputs
-      elif element.type == 'input':
-        input = element.element
-        form_spider.fill_input(input)
-      # fill textareas
-      elif element.type == 'textarea':
-        textarea = element.element
-        form_spider.fill_textarea(textarea)
+      elements_to_fill = \
+        list(map(WebElementObj.web_ele_2_select, selects)) + \
+        list(map(WebElementObj.web_ele_2_input, inputs)) + \
+        list(map(WebElementObj.web_ele_2_textarea, textareas))
       
-    # find submit buttons/inputs
-    submits = form_spider.find_elements_submit()
+      for element in elements_to_fill:
+        # fill select boxes
+        if element.type == 'select':
+          select = element.element
+          form_spider.fill_select(select)
+        # fill inputs
+        elif element.type == 'input':
+          input = element.element
+          form_spider.fill_input(input)
+        # fill textareas
+        elif element.type == 'textarea':
+          textarea = element.element
+          form_spider.fill_textarea(textarea)
+        
+      # find submit buttons/inputs
+      submits = form_spider.find_elements_submit()
 
-    # submit forms
-    # open each form to new tabs
-    for submit_element in submits:
-      if submit_element.is_enabled() and submit_element.is_displayed():
-        try:
-          ActionChains(driver)\
-            .key_down(Keys.CONTROL)\
-            .click(submit_element)\
-            .key_up(Keys.CONTROL)\
-            .perform()
-        except:
-          pass
-    
-    # get number of open tabs
-    open_tabs = driver.window_handles
+      # submit forms
+      # open each form to new tabs
+      for submit_element in submits:
+        if submit_element.is_enabled() and submit_element.is_displayed():
+          try:
+            ActionChains(driver)\
+              .key_down(Keys.CONTROL)\
+              .click(submit_element)\
+              .key_up(Keys.CONTROL)\
+              .perform()
+          except:
+            pass
+      
+      # get number of open tabs
+      open_tabs = driver.window_handles
 
-    # only run when at least 1 new tab is opened
-    if len(open_tabs) > 2:
-      for i in range(len(open_tabs)-1, 1, -1):
-        driver.switch_to.window(driver.window_handles[i])
-        self.urls.put(driver.current_url)
-        self.internal_urls.add(driver.current_url)
-        driver.close()
-      driver.switch_to.window(driver.window_handles[1])
+      # only run when at least 1 new tab is opened
+      if len(open_tabs) > 2:
+        for i in range(len(open_tabs)-1, 1, -1):
+          driver.switch_to.window(driver.window_handles[i])
+          self.urls.put(driver.current_url)
+          self.internal_urls.add(driver.current_url)
+          driver.close()
+        driver.switch_to.window(driver.window_handles[1])
+    except Exception as e:
+      print(e)
 
   def crawl(self, url, driver, userType):
     # remove redundant files im /tmp
     os.system("rm -rf *")
-    os.mkdir(f"../output/{self.Target}")
+    os.mkdir(f"../output/{self.Target}/{userType}")
 
     # crawl a web page and get all links
     links = self.get_all_website_links(url, driver)
@@ -238,11 +242,12 @@ class Project:
         else:
           links = self.get_all_website_links(current_url_in_browser, driver)
 
+        print('OK')
         driver.close()
 
         # mapping link - traffic files
         new_link_id = ObjectId()
-        traffic_path = Utils.map_link_traffic(new_link, str( self.Target), str(new_link_id))
+        traffic_path = Utils.map_link_traffic(new_link, str( self.Target), str(new_link_id), userType)
         self.db_links.append({
           "_id": new_link_id,
           "url": new_link,
@@ -258,7 +263,7 @@ class Project:
         print(f"DONE | {new_link}")
         self.done_links.append(new_link)
       except Exception as e:
-        # print(e)
+        print(e)
         print(f"FAIL | {new_link}")
 
       if links.empty():

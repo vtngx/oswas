@@ -190,14 +190,14 @@ class Utils:
     return success
 
   @staticmethod
-  def map_link_traffic(link, target_id, output_dir):
+  def map_link_traffic(link, target_id, output_dir, userType):
     # folderOutput = str(link).replace("/","SLASH")
-    parent_dir = f"../output/{target_id}"
+    parent_dir = f"../output/{target_id}/{userType}"
     path = os.path.join(parent_dir, output_dir)
 
     os.makedirs(path, exist_ok=True)
     os.chdir("../")
-    os.system(f"mv ./tmp/* ./output/{target_id}/{output_dir}")
+    os.system(f"mv ./tmp/* ./output/{target_id}/{userType}/{output_dir}")
     os.chdir("tmp")
 
-    return f"./output/{target_id}/{output_dir}"
+    return f"./output/{target_id}/{userType}/{output_dir}"
