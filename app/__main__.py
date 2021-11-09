@@ -38,12 +38,12 @@ def main():
   #set up proxy for firefox
   directory = Path('tmp')
   directory.mkdir(exist_ok=True)
+  script_p = f"../../app/lib"
 
   os.chdir(f'./{directory}')
 
-  script_path = "/home/kali/Desktop/Capstone/oswas/app/lib/"
   # cmd = f'qterminal -e mitmdump -s {script_path}/save_respone.py --mode upstream:http://127.0.0.1:8888 --ssl-insecure'
-  cmd = f'qterminal -e mitmdump -s {script_path}/save_respone.py --mode upstream:http://127.0.0.1:8888 --ssl-insecure'
+  cmd = f'qterminal -e mitmdump -s {script_p}/save_respone.py --mode upstream:http://127.0.0.1:8888 --ssl-insecure'
   mitmproxy = subprocess.Popen(cmd, shell=True)
 
   proxy = '127.0.0.1:8080'
@@ -102,15 +102,15 @@ def main():
 
 
   # crawler results
-  # if res_noauth: links_noauth = res_noauth
-  # if res_user_1: links_user_1 = res_user_1
-  # if res_user_2: links_user_2 = res_user_2
-  # if res_admin: links_admin = res_admin
+  if res_noauth: links_noauth = res_noauth
+  if res_user_1: links_user_1 = res_user_1
+  if res_user_2: links_user_2 = res_user_2
+  if res_admin: links_admin = res_admin
 
-  # print('crawl noauth:', len(links_noauth) or 0)
-  # print('crawl user 1:', len(links_user_1) or 0)
-  # print('crawl user 2:', len(links_user_2) or 0)
-  # print('crawl admin:' , len(links_admin) or 0)
+  print('crawl noauth:', len(links_noauth) or 0)
+  print('crawl user 1:', len(links_user_1) or 0)
+  print('crawl user 2:', len(links_user_2) or 0)
+  print('crawl admin:' , len(links_admin) or 0)
 
   os.kill(int(mitmproxy.pid), 0)
 
