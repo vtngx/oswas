@@ -41,7 +41,7 @@ class Project:
     self.start_url = input('> Enter the URL: ')
 
     if (self.start_url):
-      self.Target = self.db.createTarget({
+      self.Target = self.db.create_target({
         "start_url": self.start_url,
         "auth_url": None,
         "domain": urlparse(self.start_url).netloc,
@@ -88,7 +88,7 @@ class Project:
     # update auth_url of Target
     if auth_url:
       self.auth_url = auth_url
-      self.db.updateTarget(self.Target, { 'auth_url': auth_url })
+      self.db.update_target(self.Target, { 'auth_url': auth_url })
 
     return auth_url   # returns None or login link
 
@@ -204,12 +204,13 @@ class Project:
           driver.close()
         driver.switch_to.window(driver.window_handles[1])
     except Exception as e:
-      print(e)
+      # print(e)
+      pass
 
-  def crawl(self, url, driver, userType):
+  def crawl(self, url, driver, user_type):
     # remove redundant files im /tmp
     os.system("rm -rf *")
-    os.mkdir(f"../output/{self.Target}/{userType}")
+    os.mkdir(f"../output/{self.Target}/{user_type}")
 
     # crawl a web page and get all links
     links = self.get_all_website_links(url, driver)
@@ -242,53 +243,55 @@ class Project:
         else:
           links = self.get_all_website_links(current_url_in_browser, driver)
 
-        print('OK')
         driver.close()
 
         # mapping link - traffic files
         new_link_id = ObjectId()
-        traffic_path = Utils.map_link_traffic(new_link, str( self.Target), str(new_link_id), userType)
+        traffic_path = Utils.map_link_traffic(new_link, str( self.Target), str(new_link_id), user_type)
         self.db_links.append({
           "_id": new_link_id,
+          "target_id": self.Target,
           "url": new_link,
-          "user": userType,
+          "user": user_type,
           "traffic_file": traffic_path,
         })
 
         if len(self.db_links) == 100:
-          self.db.createLinksMulti(self.db_links)
+          self.db.create_links_multi(self.db_links)
           self.db_links = []
         
         driver.switch_to.window(driver.window_handles[0])
         print(f"DONE | {new_link}")
         self.done_links.append(new_link)
       except Exception as e:
-        print(e)
+        # print(e)
         print(f"FAIL | {new_link}")
 
       if links.empty():
-        self.db.createLinksMulti(self.db_links)
-        self.db.updateTarget(self.Target, { 'status': TargetStatus.DONE })
+        self.db.create_links_multi(self.db_links)
+        self.db.update_target(self.Target, { 'status': TargetStatus.DONE })
         return
 
 
-  def start_crawler(self, driver, userType: UserCrawlType):
+  def start_crawler(self, auth_url, driver, user_type: UserCrawlType):
     self.internal_urls = set()
     self.external_urls = set()
     self.urls = Queue()
     self.done_links = []
     self.db_links = []
 
-    if self.auth_url and not Utils.eq_urls(self.auth_url, self.start_url):
+    if auth_url and not Utils.eq_urls(auth_url, self.start_url):
       self.db_links.append({
         "_id": ObjectId(),
-        "url": self.auth_url,
-        "user": userType,
+        "target_id": self.Target,
+        "url": auth_url,
+        "user": user_type,
         "traffic_file": None,
       })
 
     driver.get(self.start_url)
-    self.crawl(self.start_url, driver, userType)
+    self.crawl(self.start_url, driver, user_type)
     driver.close()
 
-    return self.done_links
+    crawled_links = self.db.get_output_links(self.Target, user_type)
+    return crawled_links

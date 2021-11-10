@@ -23,25 +23,6 @@ class Utils:
     return url1_parts == url2_parts
 
   @staticmethod
-  def linkToDbObj(url, from_url, user=UserCrawlType.NO_AUTH, traffic_file=None):
-    return {
-      "url": url,
-      "user": user,
-      "traffic_file": traffic_file or None,
-    }
-
-  @staticmethod
-  def linksToDbObjList(urls, user=UserCrawlType.NO_AUTH, traffic_file=None):
-    list = []
-    for url in urls:
-      list.append({
-        "url": url,
-        "user": user,
-        "traffic_file": None,
-      })
-    return list
-
-  @staticmethod
   def check_authlink(url) -> bool:
     keywords = AuthKeywords
     html_output_name = urlparse(url).scheme
@@ -190,14 +171,15 @@ class Utils:
     return success
 
   @staticmethod
-  def map_link_traffic(link, target_id, output_dir, userType):
+  def map_link_traffic(link, target_id, output_dir, user_type):
     # folderOutput = str(link).replace("/","SLASH")
-    parent_dir = f"../output/{target_id}/{userType}"
+    parent_dir = f"../output/{target_id}/{user_type}"
     path = os.path.join(parent_dir, output_dir)
 
     os.makedirs(path, exist_ok=True)
-    os.chdir("../")
-    os.system(f"mv ./tmp/* ./output/{target_id}/{userType}/{output_dir}")
-    os.chdir("tmp")
+    if len(os.listdir('./')) != 0:
+      os.chdir("../")
+      os.system(f"mv ./tmp/* ./output/{target_id}/{user_type}/{output_dir}")
+      os.chdir("tmp")
 
-    return f"./output/{target_id}/{userType}/{output_dir}"
+    return f"./output/{target_id}/{user_type}/{output_dir}"

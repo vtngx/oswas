@@ -13,23 +13,30 @@ class Database:
     client = MongoClient(CONNECTION_STRING)
     return client['oswas-db']
   
-  def createTarget(self, target):
+  def create_target(self, target):
     data = self.Targets.insert(target)
     return data 
 
-  def createLink(self, link):
+  def create_link(self, link):
     data = self.Links.insert(link)
     return data
 
-  def createLinksMulti(self, links):
+  def create_links_multi(self, links):
     data = self.Links.insert_many(links)
     return data
 
-  def updateTarget(self, targetId, updateData):
+  def update_target(self, target_id, update_data):
     data = self.Targets.update(
-      { '_id': targetId },
+      { '_id': target_id },
       {
-        '$set': updateData,
+        '$set': update_data,
       }
     )
     return data
+
+  def get_output_links(self, target_id, user_type):
+    links = self.Links.find({
+      "target_id": target_id,
+      "user": user_type,
+    })
+    return list(links)
