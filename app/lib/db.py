@@ -22,8 +22,9 @@ class Database:
     return data
 
   def create_links_multi(self, links):
-    data = self.Links.insert_many(links)
-    return data
+    if len(links) != 0:
+      data = self.Links.insert_many(links)
+      return data
 
   def update_target(self, target_id, update_data):
     data = self.Targets.update(
