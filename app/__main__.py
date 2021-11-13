@@ -16,7 +16,7 @@ def main():
   # start app
   project = Project(opts)
   project.start()
-
+  
   # 
   # MODULE 1
   # 
@@ -107,12 +107,8 @@ def main():
             UserCrawlType.ADMIN
           )
 
-
   # crawler results
-  if res_noauth: print('crawl noauth:', len(res_noauth))
-  if res_user_1: print('crawl user 1:', len(res_user_1))
-  if res_user_2: print('crawl user 2:', len(res_user_2))
-  if res_admin:  print('crawl admin:' , len(res_admin))
+  project.print_output_count(res_noauth, res_user_1, res_user_2, res_admin)
 
   os.kill(int(mitmproxy.pid), 0)
 

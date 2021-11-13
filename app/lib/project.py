@@ -275,6 +275,9 @@ class Project:
 
 
   def start_crawler(self, auth_url, driver, user_type: UserCrawlType):
+    os.system("clear")
+    print(f"START CRAWLER: {self.start_url} | PROFILE: {user_type}\n")
+    
     self.internal_urls = set()
     self.external_urls = set()
     self.urls = Queue()
@@ -296,3 +299,19 @@ class Project:
 
     crawled_links = self.db.get_output_links(self.Target, user_type)
     return crawled_links
+
+
+  def print_output_count(self, r_noauth, r_user1, r_user2, r_admin):
+    os.system("clear")
+
+    profiles_count = 0
+    if r_noauth or isinstance(r_noauth, list): profiles_count += 1
+    if r_user1  or isinstance(r_user1, list):  profiles_count += 1
+    if r_user2  or isinstance(r_user2, list):  profiles_count += 1
+    if r_admin  or isinstance(r_admin, list):  profiles_count += 1
+
+    print(f"CRAWL DONE: {self.start_url} | {profiles_count} PROFILES\n")
+    if r_noauth or isinstance(r_noauth, list): print('NOAUTH:', len(r_noauth))
+    if r_user1  or isinstance(r_user1, list):  print('USER 1:', len(r_user1))
+    if r_user2  or isinstance(r_user2, list):  print('USER 2:', len(r_user2))
+    if r_admin  or isinstance(r_admin, list):  print('ADMIN:' , len(r_admin))
