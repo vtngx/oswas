@@ -47,7 +47,7 @@ class Project:
         "domain": urlparse(self.start_url).netloc,
         "status": TargetStatus.DOING,
       })
-      os.mkdir(f"output/{self.Target}")
+      os.makedirs(f"output/{self.Target}", exist_ok=True)
 
 
   # MODULE 1
@@ -206,6 +206,7 @@ class Project:
     except Exception as e:
       # print(e)
       pass
+
 
   def crawl(self, url, driver, user_type):
     # remove redundant files im /tmp
