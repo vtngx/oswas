@@ -10,6 +10,7 @@ from bson.objectid import ObjectId
 from .form_spider import FormSpider
 from .web_element import WebElementObj
 from urllib.parse import urlparse, urljoin
+from colorama.ansi import Back, Fore, Style
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from .constants import TargetStatus, UserCrawlType
@@ -38,7 +39,10 @@ class Project:
   # start function
   def start(self):
     os.system('clear')
-    self.start_url = input('> Enter the URL: ')
+    self.start_url = input(
+      Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
+      ' Enter the URL: '
+    )
 
     if (self.start_url):
       self.Target = self.db.create_target({
@@ -56,13 +60,19 @@ class Project:
     auth_url = None
 
     # prompt user to input auth_link
-    choice = input('?> Do you have login page? (y/N): ')
+    choice = input(
+      Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
+      ' Do you have login page? (y/N): '
+    )
 
     if not choice:
       choice = 'n'
     
     if choice.lower() == 'y':
-      auth_url = input('?> Please enter login page: ')
+      auth_url = input(
+        Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
+        ' Please enter login page: '
+      )
     elif choice.lower() == 'n':
       tmp = urlparse(url).netloc
       if tmp == '':
@@ -79,7 +89,10 @@ class Project:
         # ask user to find login_url from list
         auth_url = Utils.pager_input(ds_links, 20)
       else:
-        print("!> dirsearch did not find any links")
+        print(
+          Back.WHITE + Fore.BLACK + ' !!! ' + Style.RESET_ALL +\
+          " 0 LINKS FOUND FROM DIRSEARCH"
+        )
 
         # check if start_url is auth_url
         if Utils.check_authlink(url):
@@ -220,7 +233,10 @@ class Project:
       # Open the first link we found in new tab
       # new_link la ten folder dang crawl
       new_link = links.get()
-      print(f"CRAWL | {new_link}")
+      print(
+        Back.YELLOW + Fore.BLACK + 'CRAWL' + Style.RESET_ALL +\
+        f" {new_link}"
+      )
 
       blacked = False
       for word in BLACKLIST:
@@ -262,11 +278,17 @@ class Project:
           self.db_links = []
         
         driver.switch_to.window(driver.window_handles[0])
-        print(f"DONE | {new_link}")
+        print(
+          Back.GREEN + Fore.BLACK + 'DONE' + Style.RESET_ALL +\
+          f" {new_link}"
+        )
         self.done_links.append(new_link)
       except Exception as e:
         # print(e)
-        print(f"FAIL | {new_link}")
+        print(
+          Back.RED + Fore.BLACK + 'FAIL' + Style.RESET_ALL +\
+          f" {new_link}"
+        )
 
       if links.empty():
         self.db.create_links_multi(self.db_links)
@@ -276,8 +298,13 @@ class Project:
 
   def start_crawler(self, auth_url, driver, user_type: UserCrawlType):
     os.system("clear")
-    print(f"START CRAWLER: {self.start_url} | PROFILE: {user_type}\n")
-    
+    print(
+      Back.GREEN + Fore.BLACK + 'START CRAWLER' + Style.RESET_ALL +\
+      f" {self.start_url} | " +\
+      Back.MAGENTA + Fore.BLACK + 'PROFILE' + Style.RESET_ALL +\
+      f" {user_type}\n"
+    )
+
     self.internal_urls = set()
     self.external_urls = set()
     self.urls = Queue()
@@ -310,7 +337,13 @@ class Project:
     if r_user2  or isinstance(r_user2, list):  profiles_count += 1
     if r_admin  or isinstance(r_admin, list):  profiles_count += 1
 
-    print(f"CRAWL DONE: {self.start_url} | {profiles_count} PROFILES\n")
+    print(
+      Back.GREEN + Fore.BLACK + 'CRAWL DONE' + Style.RESET_ALL +\
+      f" {self.start_url} | " +\
+      Back.MAGENTA + Fore.BLACK +\
+      f" {profiles_count} PROFILES " +\
+      Style.RESET_ALL
+    )
     if r_noauth or isinstance(r_noauth, list): print('NOAUTH:', len(r_noauth))
     if r_user1  or isinstance(r_user1, list):  print('USER 1:', len(r_user1))
     if r_user2  or isinstance(r_user2, list):  print('USER 2:', len(r_user2))

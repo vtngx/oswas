@@ -16,24 +16,9 @@ def main():
   # start app
   project = Project(opts)
   project.start()
-  
-  # 
-  # MODULE 1
-  # 
-  # find login link
-  #   prompt user (input/find with dirsearch)
-  #   identify login link by signatures
-  # 
-  auth_url = project.find_auth_link()
 
-  # 
-  # MODULE 2
-  # 
-  # crawl new links with user authen & author
-  #   crawl using no auth
-  #   crawl using normal users
-  #   crawl using admin
-  # 
+  # identify auth url
+  auth_url = project.find_auth_link()
 
   #set up proxy for firefox
   directory = Path('tmp')
