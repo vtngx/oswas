@@ -23,7 +23,7 @@ def main():
   #set up proxy for firefox
   directory = Path('tmp')
   directory.mkdir(exist_ok=True)
-  script_p = f"../../app/lib/save_respone.py"
+  script_p = f"{os.getcwd()}/../app/lib/save_respone.py"
 
   os.chdir(f'./{directory}')
 
@@ -96,6 +96,7 @@ def main():
   project.print_output_count(res_noauth, res_user_1, res_user_2, res_admin)
 
   os.kill(int(mitmproxy.pid), 0)
+  os.chdir("..")
 
 
 if __name__ == "__main__":
