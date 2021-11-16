@@ -10,11 +10,11 @@ class Options:
     self.parser = OptionParser(usage=usage)
 
     self.parser.add_option(
-      '-s', '--simple',
+      '-s', '--single',
       action="store_true",
       default=False,
-      dest='simple',
-      help='simple mode'
+      dest='single',
+      help='single mode - crawl & scan only with 1 browser'
     )
 
   def parse(self, args=None):

@@ -27,8 +27,8 @@ def main():
 
   os.chdir(f'./{directory}')
 
-  # cmd = f'qterminal -e mitmdump -s {script_p} --ssl-insecure'
-  cmd = f'qterminal -e mitmdump -s {script_p} --mode upstream:http://127.0.0.1:8888 --ssl-insecure'
+  cmd = f'qterminal -e mitmdump -s {script_p} --ssl-insecure'
+  # cmd = f'qterminal -e mitmdump -s {script_p} --mode upstream:http://127.0.0.1:8888 --ssl-insecure'
   mitmproxy = subprocess.Popen(cmd, shell=True)
 
   proxy = '127.0.0.1:8080'

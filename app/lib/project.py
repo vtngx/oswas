@@ -3,6 +3,7 @@ import colorama
 from queue import Queue
 from .db import Database
 from .utils import Utils
+from .sitemap import Sitemap
 from dotenv import load_dotenv
 from .dirsearch import Dirsearch
 from .constants import BLACKLIST
@@ -325,6 +326,15 @@ class Project:
     driver.close()
 
     crawled_links = self.db.get_output_links(self.Target, user_type)
+
+    # build sitemap
+    os.chdir(f"../output/{self.Target}/{user_type}")
+    sm = Sitemap(self.start_url, crawled_links, self.Target)
+    sm.build_xml()
+    sm.build_visual()
+    os.chdir("../../../tmp")
+    print(os.getcwd())
+
     return crawled_links
 
 
@@ -342,7 +352,7 @@ class Project:
       f" {self.start_url} | " +\
       Back.MAGENTA + Fore.BLACK +\
       f" {profiles_count} PROFILES " +\
-      Style.RESET_ALL
+      Style.RESET_ALL + "\n"
     )
     if r_noauth or isinstance(r_noauth, list): print('NOAUTH:', len(r_noauth))
     if r_user1  or isinstance(r_user1, list):  print('USER 1:', len(r_user1))
