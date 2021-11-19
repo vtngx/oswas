@@ -30,7 +30,8 @@ class InputTypes:
   WEEK = "week"
 
 AuthKeywords = [
-  'login', 'loginform', 'log in', 'signin', 'sign in', 'dang-nhap', 'Sign in'
+  'Login', 'Log in' , 'login', 'loginform' , 'log in', '/login', 'Sign In',  'Sign in' , 'signin',
+  'sign in', 'sign_in', '/sign_in', 'Đăng nhập', 'dang-nhap'
 ]
 
 BLACKLIST = [
