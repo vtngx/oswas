@@ -85,6 +85,7 @@ class Project:
       ds = Dirsearch(url, parseUrl)
       ds._run()
       ds_links = ds.getURL()
+      # ds_links = []
 
       if len(ds_links):
         # ask user to find login_url from list
@@ -135,6 +136,10 @@ class Project:
 
       # remove URL GET parameters, URL fragments, etc.
       href = parsed_href.scheme + "://" + parsed_href.netloc + parsed_href.path
+      
+      if parsed_href.query:
+        href = href + "?" + parsed_href.query
+
       if "pdf" in urlparse(href).path:
         self.internal_urls.add(href)
         continue
@@ -251,6 +256,7 @@ class Project:
         driver.switch_to.window(driver.window_handles[1])
       
         driver.get(new_link)
+        driver.implicitly_wait(3)
         self.crawl_from_forms(driver)
 
         # redirected link handler
@@ -358,3 +364,4 @@ class Project:
     if r_user1  or isinstance(r_user1, list):  print('USER 1:', len(r_user1))
     if r_user2  or isinstance(r_user2, list):  print('USER 2:', len(r_user2))
     if r_admin  or isinstance(r_admin, list):  print('ADMIN:' , len(r_admin))
+    print()
