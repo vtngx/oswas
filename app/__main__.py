@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+from lib import Scanner
 from pathlib import Path
 from lib.utils import Utils
 from selenium import webdriver
@@ -92,11 +93,17 @@ def main():
             UserCrawlType.ADMIN
           )
 
+  os.kill(int(mitmproxy.pid), 0)
+  os.chdir("..")
+
   # crawler results
   project.print_output_count(res_noauth, res_user_1, res_user_2, res_admin)
 
-  os.kill(int(mitmproxy.pid), 0)
-  os.chdir("..")
+  # test for authen vulnerabilities
+  directory = Path('testing_noauth')
+  directory.mkdir(exist_ok=True)
+  Scanner().run(res_noauth, res_user_1, res_user_2, res_admin)
+
 
 
 if __name__ == "__main__":

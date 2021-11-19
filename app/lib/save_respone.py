@@ -36,7 +36,7 @@ def request(flow):
 
     os.chdir(current_path)
 
-    directory = Path(urlparse(flow.request.pretty_url).netloc)
+    directory = Path(urlparse(flow.request.pretty_url).scheme + "\\\\" + urlparse(flow.request.pretty_url).netloc)
 
     directory.mkdir(exist_ok=True)
 

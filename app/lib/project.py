@@ -134,6 +134,10 @@ class Project:
 
       # remove URL GET parameters, URL fragments, etc.
       href = parsed_href.scheme + "://" + parsed_href.netloc + parsed_href.path
+
+      if parsed_href.query:
+        href = href + "?" + parsed_href.query
+
       if "pdf" in urlparse(href).path:
         self.internal_urls.add(href)
         continue
