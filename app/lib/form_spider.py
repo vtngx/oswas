@@ -135,50 +135,50 @@ class FormSpider:
           input_element = WebDriverWait(self.driver, self.max_wait).until(
             EC.visibility_of_element_located(selector)
           )
-        input_element.clear()
-        input_element.send_keys(str("%06x" % random.randint(0, 0xFFFFFF)))
+        if not input_element.get_attribute("value"):
+          input_element.send_keys(str("%06x" % random.randint(0, 0xFFFFFF)))
       elif type == InputTypes.DATE:
         if selector:
           input_element = WebDriverWait(self.driver, self.max_wait).until(
             EC.visibility_of_element_located(selector)
           )
-        input_element.clear()
-        input_element.send_keys(datetime.today().strftime('%Y-%m-%d'))
+        if not input_element.get_attribute("value"):
+          input_element.send_keys(datetime.today().strftime('%Y-%m-%d'))
       elif type == InputTypes.DATETIME_LOCAL:
         if selector:
           input_element = WebDriverWait(self.driver, self.max_wait).until(
             EC.visibility_of_element_located(selector)
           )
-        input_element.clear()
-        input_element.send_keys(datetime.today().strftime('%Y-%m-%dT%H:%M'))
+        if not input_element.get_attribute("value"):
+          input_element.send_keys(datetime.today().strftime('%Y-%m-%dT%H:%M'))
       elif type == InputTypes.EMAIL:
         if selector:
           input_element = WebDriverWait(self.driver, self.max_wait).until(
             EC.visibility_of_element_located(selector)
           )
-        input_element.clear()
-        input_element.send_keys(''.join(random.choice(string.ascii_letters) for x in range(7)) + "@gmail.com")
+        if not input_element.get_attribute("value"):
+          input_element.send_keys(''.join(random.choice(string.ascii_letters) for x in range(7)) + "@gmail.com")
       elif type == InputTypes.MONTH:
         if selector:
           input_element = WebDriverWait(self.driver, self.max_wait).until(
             EC.visibility_of_element_located(selector)
           )
-        input_element.clear()
-        input_element.send_keys(datetime.today().strftime('%Y-%m'))
+        if not input_element.get_attribute("value"):
+          input_element.send_keys(datetime.today().strftime('%Y-%m'))
       elif type == InputTypes.NUMBER:
         if selector:
           input_element = WebDriverWait(self.driver, self.max_wait).until(
             EC.visibility_of_element_located(selector)
           )
-        input_element.clear()
-        input_element.send_keys(str(random.randint(0, 100000)))
+        if not input_element.get_attribute("value"):
+          input_element.send_keys(str(random.randint(0, 100000)))
       elif type == InputTypes.PASSWORD:
         if selector:
           input_element = WebDriverWait(self.driver, self.max_wait).until(
             EC.visibility_of_element_located(selector)
           )
-        input_element.clear()
-        input_element.send_keys(''.join(random.choice(string.ascii_letters + string.digits + "!@#$%^&*()") for i in range(10)))
+        if not input_element.get_attribute("value"):
+          input_element.send_keys(''.join(random.choice(string.ascii_letters + string.digits + "!@#$%^&*()") for i in range(10)))
       elif type == InputTypes.RADIO:
         if selector:
           input_element = WebDriverWait(self.driver, self.max_wait).until(
@@ -192,48 +192,48 @@ class FormSpider:
           input_element = WebDriverWait(self.driver, self.max_wait).until(
             EC.visibility_of_element_located(selector)
           )
-        input_element.clear()
-        if dummy_data:
-          input_element.send_keys(dummy_data)
-        else:
-          input_element.send_keys('search')
+        if not input_element.get_attribute("value"):
+          if dummy_data:
+            input_element.send_keys(dummy_data)
+          else:
+            input_element.send_keys('search')
       elif type == InputTypes.TEXT:
         if selector:
           input_element = WebDriverWait(self.driver, self.max_wait).until(
             EC.visibility_of_element_located(selector)
           )
-        input_element.clear()
-        if pattern:
-          input_element.send_keys(dummy_data)
-        else:
-          input_element.send_keys('test')
+        if not input_element.get_attribute("value"):
+          if pattern:
+            input_element.send_keys(dummy_data)
+          else:
+            input_element.send_keys('test')
       elif type == InputTypes.TEL:
         if selector:
           input_element = WebDriverWait(self.driver, self.max_wait).until(
             EC.visibility_of_element_located(selector)
           )
-        input_element.clear()
-        if pattern:
-          input_element.send_keys(dummy_data)
-        else:
-          input_element.send_keys('0384846791')
+        if not input_element.get_attribute("value"):
+          if pattern:
+            input_element.send_keys(dummy_data)
+          else:
+            input_element.send_keys('0384846791')
       elif type == InputTypes.TIME:
         if selector:
           input_element = WebDriverWait(self.driver, self.max_wait).until(
             EC.visibility_of_element_located(selector)
           )
-        input_element.clear()
-        input_element.send_keys(datetime.today().strftime('%H:%M'))
+        if not input_element.get_attribute("value"):
+          input_element.send_keys(datetime.today().strftime('%H:%M'))
       elif type == InputTypes.URL:
         if selector:
           input_element = WebDriverWait(self.driver, self.max_wait).until(
             EC.visibility_of_element_located(selector)
           )
-        input_element.clear()
-        if pattern:
-          input_element.send_keys(dummy_data)
-        else:
-          input_element.send_keys('https://example.com/')
+        if not input_element.get_attribute("value"):
+          if pattern:
+            input_element.send_keys(dummy_data)
+          else:
+            input_element.send_keys('https://example.com/')
       # print(f'filled input type {type}')
     except:
       # print(f"fill error {type} {selector}")

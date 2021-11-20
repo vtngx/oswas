@@ -204,6 +204,7 @@ class Project:
             ActionChains(driver)\
               .key_down(Keys.CONTROL)\
               .click(submit_element)\
+              .pause(3)\
               .key_up(Keys.CONTROL)\
               .perform()
           except:
