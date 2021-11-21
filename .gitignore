@@ -94,4 +94,5 @@ dirsearch
 bin/*.txt
 bin/output
 bin/tmp
-bin/testing_noauth
+bin/testing
+_test
