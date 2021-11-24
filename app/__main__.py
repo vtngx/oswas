@@ -99,8 +99,8 @@ def main():
   # crawler results
   project.print_output_count(res_noauth, res_user_1, res_user_2, res_admin)
 
-  # test for authen vulnerabilities
-  directory = Path('testing_noauth')
+  # test for authen + IDOR vulnerabilities
+  directory = Path('testing')
   directory.mkdir(exist_ok=True)
   Scanner().run(res_noauth, res_user_1, res_user_2, res_admin)
 
