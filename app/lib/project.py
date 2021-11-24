@@ -29,7 +29,7 @@ class Project:
     self.Target = None
     self.auth_url = None
     self.MAX_TRIES = 1
-    self.MAX_WAIT = 3
+    self.MAX_WAIT = 2.5
 
 
   # get arguments
@@ -206,6 +206,7 @@ class Project:
             ActionChains(driver)\
               .key_down(Keys.CONTROL)\
               .click(submit_element)\
+              .pause(5)\
               .key_up(Keys.CONTROL)\
               .perform()
           except:

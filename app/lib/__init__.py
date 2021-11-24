@@ -3,6 +3,7 @@ from .db import Database
 from .project import Project
 from .options import Options
 from .sitemap import Sitemap
+from .scanner import Scanner
 from .dirsearch import Dirsearch
 from .form_spider import FormSpider
 from .web_element import WebElementObj
