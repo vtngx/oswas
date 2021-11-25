@@ -41,3 +41,13 @@ class Database:
       "user": user_type,
     })
     return list(links)
+  
+  def get_all_targets(self):
+    targets = self.Targets.find({}).sort("status", -1)
+    return list(targets)
+
+  def count_target_links(self, target_id):
+    links = self.Links.find({
+      "target_id": target_id,
+    })
+    return len(list(links))

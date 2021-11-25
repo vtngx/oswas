@@ -1,5 +1,6 @@
 import os
 import colorama
+import datetime
 from queue import Queue
 from .db import Database
 from .utils import Utils
@@ -40,19 +41,27 @@ class Project:
   # start function
   def start(self):
     os.system('clear')
-    self.start_url = input(
-      Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
-      ' Enter the URL: '
-    )
 
-    if (self.start_url):
-      self.Target = self.db.create_target({
-        "start_url": self.start_url,
-        "auth_url": None,
-        "domain": urlparse(self.start_url).netloc,
-        "status": TargetStatus.DOING,
-      })
-      os.makedirs(f"output/{self.Target}", exist_ok=True)
+    while True:
+      self.start_url = input(
+        Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
+        ' Enter the URL: '
+      )
+
+      if self.start_url:
+        if not self.start_url.endswith("/"):
+          self.start_url += "/"
+        self.Target = self.db.create_target({
+          "start_url": self.start_url,
+          "auth_url": None,
+          "domain": urlparse(self.start_url).netloc,
+          "status": TargetStatus.DOING,
+          "started_at": str(datetime.datetime.utcnow())
+        })
+        os.makedirs(f"output/{self.Target}", exist_ok=True)
+        break
+      else:
+        print(Fore.RED + 'PLEASE INPUT VALID URL' + Style.RESET_ALL)
 
 
   # MODULE 1
