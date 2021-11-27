@@ -4,3 +4,4 @@ vulns.forEach(vuln => {
     output += `<div class="row"><div class="col mb-2"><div class="card border-left-danger shadow"><div class="card-body"><div class="card-title"><h3>${vuln.link}</h3></div><div class="row no-gutters align-items-center"><div class="col mr-2"><div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Type</div><div class="h6 mb-0 font-weight-bold text-gray-800">${vuln.type}</div></div><div class="col mr-2"><div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Path</div><div class="h6 mb-0 font-weight-bold text-gray-800">${vuln.vuln_link}</div></div></div></div></div></div></div>`
 })
 document.getElementById("vulns").innerHTML = output
+
