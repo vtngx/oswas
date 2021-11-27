@@ -11,7 +11,7 @@ class Database:
   def _connect(self):
     CONNECTION_STRING = os.getenv('MONGO_URI')
     client = MongoClient(CONNECTION_STRING)
-    return client['oswas-db']
+    return client['oswas']
   
   def create_target(self, target):
     data = self.Targets.insert(target)
@@ -41,9 +41,15 @@ class Database:
       "user": user_type,
     })
     return list(links)
+
+  def get_all_target_links(self, target_id):
+    links = self.Links.find({
+      "target_id": target_id,
+    })
+    return list(links)
   
   def get_all_targets(self):
-    targets = self.Targets.find({}).sort("status", -1)
+    targets = self.Targets.find({}).sort("started_at", -1)
     return list(targets)
 
   def count_target_links(self, target_id):

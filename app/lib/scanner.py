@@ -41,9 +41,9 @@ class Scanner:
       self.scan_hrz_idor(links_user1, links_user2)
     
     self.VULN_LINKS = [i for n, i in enumerate(self.VULN_LINKS) if i not in self.VULN_LINKS[n + 1:]]
-    print("\nVulns:")
-    for v in self.VULN_LINKS:
-      print(v)
+    print("\nVulns:", len(self.VULN_LINKS))
+    print(os.getcwd())
+    return self.VULN_LINKS
 
   def get_diff(self, list_links_1, list_links_2):
     return (list(link for link in list_links_1 if link["url"] not in list(link["url"] for link in list_links_2)))
@@ -121,6 +121,7 @@ class Scanner:
         if perform_test:
           # compare respinse text difference
           diff_amount = SequenceMatcher(None, res_o.text, res_t.text).ratio() * 100
+          print(f'{method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}')
 
           # add to vuln list if 2 responses are >= 70% similar 
           if res_t.status_code < 400:
@@ -255,8 +256,9 @@ class Scanner:
             if perform_test:
               # compare respinse text difference
               diff_amount = SequenceMatcher(None, res_o.text, res_t.text).ratio() * 100
+              print(f'{method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}')
 
-              # add to vuln list if 2 responses are >= 70% similar 
+              # add to vuln list if 2 responses are >= 70% similar
               # & status code != 401 and 403
               if res_t.status_code < 400:
                 if diff_amount > self.MIN_DIFF_PERCENTAGE:

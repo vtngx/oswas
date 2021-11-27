@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+from lib import Report
 from lib import Scanner
 from pathlib import Path
 from lib.utils import Utils
@@ -72,7 +73,7 @@ def main():
       )
 
       # crawl with user 2
-      has_user_2 = Utils.yes_no_question('> Do you have another user account?')
+      has_user_2 = Utils.yes_no_question('Do you have another user account?')
       if has_user_2:
         driver_user_2 = webdriver.Firefox(capabilities=firefox_capabilities)
         if Utils.prompt_login(auth_url, driver_user_2):
@@ -83,7 +84,7 @@ def main():
           )
 
       # crawl with admin
-      has_admin = Utils.yes_no_question('> Do you have an admin account?')
+      has_admin = Utils.yes_no_question('Do you have an admin account?')
       if has_admin:
         driver_admin = webdriver.Firefox(capabilities=firefox_capabilities)
         if Utils.prompt_login(auth_url, driver_admin):
@@ -99,10 +100,17 @@ def main():
   # crawler results
   project.print_output_count(res_noauth, res_user_1, res_user_2, res_admin)
 
+  # create sitemap
+  project.create_sitemap()
+
   # test for authen + IDOR vulnerabilities
   directory = Path('testing')
   directory.mkdir(exist_ok=True)
-  Scanner().run(res_noauth, res_user_1, res_user_2, res_admin)
+  project.add_vulns_to_target(Scanner().run(res_noauth, res_user_1, res_user_2, res_admin))
+
+  report = Report()
+  report.create_index_page()
+  report.create_report_files()
 
 
 

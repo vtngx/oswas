@@ -146,7 +146,7 @@ class Utils:
     os.system("clear")
     answer = input(
       Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
-      f' {question} (y/n):'
+      f' {question} (y/n): '
     ).strip()
     print("")
     while not (answer == "y" or answer == "yes" or
@@ -154,7 +154,7 @@ class Utils:
       print("Input (yes/y) or (no/n)")
       answer = input(
         Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
-        f' {question} (y/n):'
+        f' {question} (y/n): '
       ).strip()
     if answer[0] == "y":
       return True
@@ -169,7 +169,7 @@ class Utils:
       driver.get(authen_url)
       
       while True:
-        if Utils.yes_no_question('?> Please confirm if you have logged in '):
+        if Utils.yes_no_question('Please confirm if you have logged in'):
           success = True
           break
         else:

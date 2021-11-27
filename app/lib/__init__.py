@@ -1,5 +1,6 @@
 from .utils import Utils
 from .db import Database
+from .report import Report
 from .project import Project
 from .options import Options
 from .sitemap import Sitemap

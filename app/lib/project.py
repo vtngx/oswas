@@ -56,7 +56,8 @@ class Project:
           "auth_url": None,
           "domain": urlparse(self.start_url).netloc,
           "status": TargetStatus.DOING,
-          "started_at": str(datetime.datetime.utcnow())
+          "started_at": str(datetime.datetime.utcnow()),
+          "vulns": []
         })
         os.makedirs(f"output/{self.Target}", exist_ok=True)
         break
@@ -343,14 +344,6 @@ class Project:
 
     crawled_links = self.db.get_output_links(self.Target, user_type)
 
-    # build sitemap
-    os.chdir(f"../output/{self.Target}/{user_type}")
-    sm = Sitemap(self.start_url, crawled_links, self.Target)
-    sm.build_xml()
-    sm.build_visual()
-    os.chdir("../../../tmp")
-    print(os.getcwd())
-
     return crawled_links
 
 
@@ -375,3 +368,16 @@ class Project:
     if r_user2  or isinstance(r_user2, list):  print('USER 2:', len(r_user2))
     if r_admin  or isinstance(r_admin, list):  print('ADMIN:' , len(r_admin))
     print()
+
+  
+  def create_sitemap(self):
+    os.chdir(f"output/{self.Target}")
+    links = self.db.get_all_target_links(self.Target)
+    sm = Sitemap(self.start_url, links)
+    sm.build_xml()
+    sm.build_visual()
+    os.chdir("../..")
+
+
+  def add_vulns_to_target(self, vulns):
+    self.db.update_target(self.Target, { 'vulns': vulns })
