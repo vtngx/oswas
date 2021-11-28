@@ -40,10 +40,9 @@ class Scanner:
     if isinstance(links_user1, list) and len(links_user1) > 0 and isinstance(links_user2, list) and len(links_user2) > 0:
       self.scan_hrz_idor(links_user1, links_user2)
     
-    self.VULN_LINKS = [i for n, i in enumerate(self.VULN_LINKS) if i not in self.VULN_LINKS[n + 1:]]
-    print("\nVulns:", len(self.VULN_LINKS))
-    print(os.getcwd())
-    return self.VULN_LINKS
+    res = [i for n, i in enumerate(self.VULN_LINKS) if i not in self.VULN_LINKS[n + 1:]]
+    print("\nVulns:", len(res))
+    return res
 
   def get_diff(self, list_links_1, list_links_2):
     return (list(link for link in list_links_1 if link["url"] not in list(link["url"] for link in list_links_2)))
