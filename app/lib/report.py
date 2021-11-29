@@ -5,6 +5,11 @@ class Report():
   def __init__(self) -> None:
     self.db = Database()
     self.targets = self.db.get_all_targets()
+    if not os.path.isdir("../app/data/report-page/reports"):
+      os.mkdir("../app/data/report-page/reports")
+    if not os.path.isdir("../app/data/report-page/js/reports"):
+      os.mkdir("../app/data/report-page/js/reports")
+
 
   def create_index_page(self):
     js_var = "var targets = [\n"

@@ -379,5 +379,9 @@ class Project:
     os.chdir("../..")
 
 
+  def update_target_profiles(self, profiles):
+    self.db.update_target(self.Target, { 'profiles': profiles })
+
+
   def add_vulns_to_target(self, vulns):
     self.db.update_target(self.Target, { 'vulns': vulns })

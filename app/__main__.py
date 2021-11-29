@@ -50,9 +50,11 @@ def main():
   res_user_1 = None
   res_user_2 = None
   res_admin  = None
+  profiles_count = 0
 
   # crawl no authen
   if auth_url is None:
+    profiles_count += 1
     res_noauth = project.start_crawler(
       None,
       webdriver.Firefox(capabilities=firefox_capabilities),
@@ -61,11 +63,13 @@ def main():
   else:
     driver_user_1 = webdriver.Firefox(capabilities=firefox_capabilities)
     if Utils.prompt_login(auth_url, driver_user_1):
+      profiles_count += 1
       res_user_1 = project.start_crawler(
         auth_url,
         driver_user_1,
         UserCrawlType.USER1
       )
+      profiles_count += 1
       res_noauth = project.start_crawler(
         None,
         webdriver.Firefox(capabilities=firefox_capabilities),
@@ -77,6 +81,7 @@ def main():
       if has_user_2:
         driver_user_2 = webdriver.Firefox(capabilities=firefox_capabilities)
         if Utils.prompt_login(auth_url, driver_user_2):
+          profiles_count += 1
           res_user_2 = project.start_crawler(
             auth_url,
             driver_user_2,
@@ -88,6 +93,7 @@ def main():
       if has_admin:
         driver_admin = webdriver.Firefox(capabilities=firefox_capabilities)
         if Utils.prompt_login(auth_url, driver_admin):
+          profiles_count += 1
           res_admin = project.start_crawler(
             auth_url,
             driver_admin,
@@ -96,6 +102,9 @@ def main():
 
   os.kill(int(mitmproxy.pid), 0)
   os.chdir("..")
+
+  # update profiles_count
+  project.update_target_profiles(profiles_count)
 
   # crawler results
   project.print_output_count(res_noauth, res_user_1, res_user_2, res_admin)
