@@ -29,6 +29,7 @@ class Report():
       f.writelines(js_var)
       f.writelines(js)
 
+
   def create_report_files(self):
     for target in self.targets:
       _id = str(target["_id"])
@@ -72,3 +73,10 @@ class Report():
           f.writelines(html)
           f.writelines(f"<script src=\"../js/reports/init_{_id}.js\"></script>\n</body>\n</html>\n")
 
+
+  def start_ui(self):
+    os.chdir("../app/data/report-page")
+    if os.path.isdir("./node_modules"):
+      os.system("rm -r node_modules")
+    os.system("npm install")
+    os.system("npm start")
