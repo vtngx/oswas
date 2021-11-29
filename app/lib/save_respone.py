@@ -1,8 +1,8 @@
-import uuid
-from mitmproxy.net.http.http1 import assemble_request
 import os
+import uuid
 from pathlib import Path
 from urllib.parse import urlparse
+from mitmproxy.net.http.http1 import assemble_request
 
 # def insert(record):
 #     # dump the details to JSON for later analysis
