@@ -120,7 +120,7 @@ def main():
   report = Report()
   report.create_index_page()
   report.create_report_files()
-
+  report.start_ui()
 
 
 if __name__ == "__main__":
