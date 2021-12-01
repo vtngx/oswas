@@ -1,4 +1,5 @@
 import os
+import json
 import shutil
 import requests
 from pathlib import PurePath
@@ -16,6 +17,7 @@ class Scanner:
     self.cwd = f'{os.getcwd()}/'
     self.testing_path = f"{os.getcwd()}/testing"
     os.system(f"rm -f {self.testing_path}/*")
+
 
   def run(self, links_noauth, links_user1, links_user2, links_admin):
     print(Back.GREEN + Fore.BLACK + 'SCANNING FOR VULNERABILITIES...' + Style.RESET_ALL + "\n")
@@ -44,8 +46,10 @@ class Scanner:
     print("\nVulns:", len(res))
     return res
 
+
   def get_diff(self, list_links_1, list_links_2):
     return (list(link for link in list_links_1 if link["url"] not in list(link["url"] for link in list_links_2)))
+
 
   def scan_authen_vuln(self, links):
     for link in links:
@@ -74,6 +78,7 @@ class Scanner:
 
       for item in AUTH_FILES:
         URL, FILE = item.values()
+        body_data = []
 
         # get original headers & data
         with open(FILE, "r") as f_origin:
@@ -81,12 +86,38 @@ class Scanner:
 
           method = lines[0].split()[0]
           url = URL + lines[0].split()[1]
+          is_header = True
 
-          for line in lines[1:len(lines) - 1]:
-            if line == "\n" or line == "":
+          for line in lines[1:]:
+            while is_header:
+              if line == "\n" or line == "":
+                is_header = False
+                break
+              x = line.split(':', 1)
+              origin_header[x[0].strip()] = x[1].strip()
               break
-            x = line.split(':', 1)
-            origin_header[x[0].strip()] = x[1].strip()
+            else:
+              body_data.append(line)
+        
+        # map request body
+        # try map to JSON format
+        json_data = {}
+        params = {}
+        if len(body_data) > 0:
+          if str(body_data[0]).startswith("{") and str(body_data[len(body_data)-1]).endswith("}"):
+            with open(f'request_{FILE}', 'w') as f_req:
+              for data in body_data:
+                f_req.write(f'{data}\n')
+            with open(f'request_{FILE}', 'r') as f_req_r:
+              json_data = json.load(f_req_r)
+          else:
+            for param in body_data:
+              p = param.split('&')
+            if len(p) > 0:
+              for value in p:
+                v = value.split('=')
+                if len(v) > 0:
+                  params[v[0].strip()] = v[1].strip()
 
         # create testing request - remove auth headers
         with open(f"testing_{FILE}", "w") as f_noauth:
@@ -114,8 +145,9 @@ class Scanner:
           perform_test = True
           res_o = requests.get(url, headers=origin_header)
           res_t = requests.get(url, headers=test_header)
-        # elif method.lower() == 'post':
-        #   res_o = requests.post(url, headers=origin_header)
+        elif method.lower() in ['post', 'put']:
+          res_o = requests.post(url, headers=origin_header, json=json_data, params=params)
+          res_t = requests.get(url, headers=test_header, json=json_data, params=params)
 
         if perform_test:
           # compare respinse text difference
@@ -136,6 +168,7 @@ class Scanner:
         os.remove(FILE)
         os.remove(f"testing_{FILE}")
       os.chdir(self.cwd)
+
 
   def get_user_tokens(self, links):
     headers = []
@@ -163,6 +196,7 @@ class Scanner:
 
     # remove duplicates and return list of headers
     return [i for n, i in enumerate(headers) if i not in headers[n + 1:]]
+
 
   def scan_idor(self, test_links, user_links, type):
     # get user auth/token headers
@@ -207,6 +241,7 @@ class Scanner:
 
         for item in TEST_FILES:
           URL, FILE = item.values()
+          body_data = []
 
           # get original headers & data
           with open(FILE, "r") as f_origin:
@@ -214,12 +249,38 @@ class Scanner:
 
             method = lines[0].split()[0]
             url = URL + lines[0].split()[1]
+            is_header = True
 
-            for line in lines[1:len(lines) - 1]:
-              if line == "\n" or line == "":
+            for line in lines[1:]:
+              while is_header:
+                if line == "\n" or line == "":
+                  is_header = False
+                  break
+                x = line.split(':', 1)
+                origin_header[x[0].strip()] = x[1].strip()
                 break
-              x = line.split(':', 1)
-              origin_header[x[0].strip()] = x[1].strip()
+              else:
+                body_data.append(line)
+        
+          # map request body
+          # try map to JSON format
+          json_data = {}
+          params = {}
+          if len(body_data) > 0:
+            if str(body_data[0]).startswith("{") and str(body_data[len(body_data)-1]).endswith("}"):
+              with open(f'request_{FILE}', 'w') as f_req:
+                for data in body_data:
+                  f_req.write(f'{data}\n')
+              with open(f'request_{FILE}', 'r') as f_req_r:
+                json_data = json.load(f_req_r)
+            else:
+              for param in body_data:
+                p = param.split('&')
+              if len(p) > 0:
+                for value in p:
+                  v = value.split('=')
+                  if len(v) > 0:
+                    params[v[0].strip()] = v[1].strip()
 
           for i, header in enumerate(user_auth_headers):
             test_file = f"testing_{i+1}_{FILE}"
@@ -249,8 +310,10 @@ class Scanner:
               perform_test = True
               res_o = requests.get(url, headers=origin_header)
               res_t = requests.get(url, headers=test_header)
-            # elif method.lower() == 'post':
-            #   res_o = requests.post(url, headers=origin_header)
+            elif method.lower() in ['post', 'put']:
+              perform_test = True
+              res_o = requests.post(url, headers=origin_header, json=json_data, params=params)
+              res_t = requests.get(url, headers=test_header, json=json_data, params=params)
 
             if perform_test:
               # compare respinse text difference
@@ -273,11 +336,13 @@ class Scanner:
           os.remove(FILE)
         os.chdir(self.cwd)
 
+
   def scan_vtc_idor(self, links_admin, links_user):
     # get links only admin user can access
     diff_links = self.get_diff(links_admin, links_user)
     # scan vertical IDOR
     self.scan_idor(diff_links, links_user, "VTC. IDOR")
+
 
   def scan_hrz_idor(self, links_user1, links_user2):
     # test IDOR for user 1
