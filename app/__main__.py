@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import subprocess
 from lib import Report
 from lib import Scanner
@@ -7,6 +8,7 @@ from pathlib import Path
 from lib.utils import Utils
 from selenium import webdriver
 from lib import Project, Options
+from lib.burpsuite import BurpSuite
 from lib.constants import UserCrawlType
 
 
@@ -29,8 +31,13 @@ def main():
 
   os.chdir(f'./{directory}')
 
-  cmd = f'qterminal -e mitmdump -s {script_p} --ssl-insecure'
-  # cmd = f'qterminal -e mitmdump -s {script_p} --mode upstream:http://127.0.0.1:8888 --ssl-insecure'
+  burp = BurpSuite()
+
+  burp.start_burp()
+  time.sleep(30)
+
+  #cmd = f'qterminal -e mitmdump -s {script_p} --ssl-insecure'
+  cmd = f'qterminal -e mitmdump -s {script_p} --mode upstream:http://127.0.0.1:8888 --ssl-insecure'
   mitmproxy = subprocess.Popen(cmd, shell=True)
 
   proxy = '127.0.0.1:8080'
@@ -116,6 +123,9 @@ def main():
   directory = Path('testing')
   directory.mkdir(exist_ok=True)
   project.add_vulns_to_target(Scanner().run(res_noauth, res_user_1, res_user_2, res_admin))
+
+  # generate scanner report (BurpSuite)
+  burp.gen_report()
 
   report = Report()
   report.create_index_page()
