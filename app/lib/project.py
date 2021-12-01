@@ -213,11 +213,15 @@ class Project:
       for submit_element in submits:
         if submit_element.is_enabled() and submit_element.is_displayed():
           try:
+            # ActionChains(driver)\
+            #   .key_down(Keys.CONTROL)\
+            #   .click(submit_element)\
+            #   .pause(5)\
+            #   .key_up(Keys.CONTROL)\
+            #   .perform()
             ActionChains(driver)\
-              .key_down(Keys.CONTROL)\
               .click(submit_element)\
               .pause(5)\
-              .key_up(Keys.CONTROL)\
               .perform()
           except:
             pass
