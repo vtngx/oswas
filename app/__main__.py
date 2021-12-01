@@ -115,6 +115,7 @@ def main():
 
   # crawler results
   project.print_output_count(res_noauth, res_user_1, res_user_2, res_admin)
+  BurpSuite().genReport()
 
   # create sitemap
   project.create_sitemap()
