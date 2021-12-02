@@ -143,12 +143,19 @@ class Utils:
 
   @staticmethod
   def yes_no_question(question):
-    answer = input(question + "(y/n): ").lower().strip()
+    os.system("clear")
+    answer = input(
+      Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
+      f' {question} (y/n): '
+    ).strip()
     print("")
     while not (answer == "y" or answer == "yes" or
                answer == "n" or answer == "no"):
       print("Input (yes/y) or (no/n)")
-      answer = input(question + "(y/n):").lower().strip()
+      answer = input(
+        Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
+        f' {question} (y/n): '
+      ).strip()
     if answer[0] == "y":
       return True
     else:
@@ -162,7 +169,7 @@ class Utils:
       driver.get(authen_url)
       
       while True:
-        if Utils.yes_no_question('?> Please confirm if you have logged in '):
+        if Utils.yes_no_question('Please confirm if you have logged in'):
           success = True
           break
         else:

@@ -1,8 +1,10 @@
 import os
 import colorama
+import datetime
 from queue import Queue
 from .db import Database
 from .utils import Utils
+from .sitemap import Sitemap
 from dotenv import load_dotenv
 from .dirsearch import Dirsearch
 from .constants import BLACKLIST
@@ -20,10 +22,9 @@ from selenium.webdriver.support import expected_conditions as EC
 
 class Project:
 
-  def __init__(self, options):
+  def __init__(self):
     load_dotenv()
     colorama.init()
-    self.options = options
     self.db = Database()
     self.Target = None
     self.auth_url = None
@@ -31,27 +32,31 @@ class Project:
     self.MAX_WAIT = 2.5
 
 
-  # get arguments
-  def get_args(self):
-    return self.options
-
-
   # start function
   def start(self):
     os.system('clear')
-    self.start_url = input(
-      Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
-      ' Enter the URL: '
-    )
 
-    if (self.start_url):
-      self.Target = self.db.create_target({
-        "start_url": self.start_url,
-        "auth_url": None,
-        "domain": urlparse(self.start_url).netloc,
-        "status": TargetStatus.DOING,
-      })
-      os.makedirs(f"output/{self.Target}", exist_ok=True)
+    while True:
+      self.start_url = input(
+        Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
+        ' Enter the URL: '
+      )
+
+      if self.start_url:
+        if not self.start_url.endswith("/"):
+          self.start_url += "/"
+        self.Target = self.db.create_target({
+          "start_url": self.start_url,
+          "auth_url": None,
+          "domain": urlparse(self.start_url).netloc,
+          "status": TargetStatus.DOING,
+          "started_at": str(datetime.datetime.utcnow()),
+          "vulns": []
+        })
+        os.makedirs(f"output/{self.Target}", exist_ok=True)
+        break
+      else:
+        print(Fore.RED + 'PLEASE INPUT VALID URL' + Style.RESET_ALL)
 
 
   # MODULE 1
@@ -84,6 +89,7 @@ class Project:
       ds = Dirsearch(url, parseUrl)
       ds._run()
       ds_links = ds.getURL()
+      # ds_links = []
 
       if len(ds_links):
         # ask user to find login_url from list
@@ -134,7 +140,7 @@ class Project:
 
       # remove URL GET parameters, URL fragments, etc.
       href = parsed_href.scheme + "://" + parsed_href.netloc + parsed_href.path
-
+      
       if parsed_href.query:
         href = href + "?" + parsed_href.query
 
@@ -201,11 +207,15 @@ class Project:
       for submit_element in submits:
         if submit_element.is_enabled() and submit_element.is_displayed():
           try:
+            # ActionChains(driver)\
+            #   .key_down(Keys.CONTROL)\
+            #   .click(submit_element)\
+            #   .pause(5)\
+            #   .key_up(Keys.CONTROL)\
+            #   .perform()
             ActionChains(driver)\
-              .key_down(Keys.CONTROL)\
               .click(submit_element)\
               .pause(5)\
-              .key_up(Keys.CONTROL)\
               .perform()
           except:
             pass
@@ -255,6 +265,7 @@ class Project:
         driver.switch_to.window(driver.window_handles[1])
       
         driver.get(new_link)
+        driver.implicitly_wait(3)
         self.crawl_from_forms(driver)
 
         # redirected link handler
@@ -330,6 +341,7 @@ class Project:
     driver.close()
 
     crawled_links = self.db.get_output_links(self.Target, user_type)
+
     return crawled_links
 
 
@@ -347,9 +359,27 @@ class Project:
       f" {self.start_url} | " +\
       Back.MAGENTA + Fore.BLACK +\
       f" {profiles_count} PROFILES " +\
-      Style.RESET_ALL
+      Style.RESET_ALL + "\n"
     )
     if r_noauth or isinstance(r_noauth, list): print('NOAUTH:', len(r_noauth))
     if r_user1  or isinstance(r_user1, list):  print('USER 1:', len(r_user1))
     if r_user2  or isinstance(r_user2, list):  print('USER 2:', len(r_user2))
     if r_admin  or isinstance(r_admin, list):  print('ADMIN:' , len(r_admin))
+    print()
+
+  
+  def create_sitemap(self):
+    os.chdir(f"output/{self.Target}")
+    links = self.db.get_all_target_links(self.Target)
+    sm = Sitemap(self.start_url, links)
+    sm.build_xml()
+    sm.build_visual()
+    os.chdir("../..")
+
+
+  def update_target_profiles(self, profiles):
+    self.db.update_target(self.Target, { 'profiles': profiles })
+
+
+  def add_vulns_to_target(self, vulns):
+    self.db.update_target(self.Target, { 'vulns': vulns })
