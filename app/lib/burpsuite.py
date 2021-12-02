@@ -6,8 +6,8 @@ import subprocess
 class BurpSuite:
 
   # start burpsuite
-  def start_burp(self):   
-    command = "./burp/burp-rest-api.sh  --headless.mode=false --config-file=./burp/project-config.json --user-config-file=./burp/user-config.json"
+  def start_burp(self):
+    command = "./burp/burp-rest-api.sh --headless.mode=false --config-file=./burp/project-config.json --user-config-file=./burp/user-config.json"
     burpApi = subprocess.Popen(command, shell=True)
     return burpApi.pid
 
