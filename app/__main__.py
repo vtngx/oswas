@@ -1,54 +1,42 @@
+import os
 import sys
-import threading
+import time
+import subprocess
+from lib import Report
+from lib import Scanner
+from pathlib import Path
 from lib.utils import Utils
 from selenium import webdriver
 from lib import Project, Options
-from multiprocessing import Process
-from multiprocessing.pool import ThreadPool
-import subprocess
-import os
-from pathlib import Path
+from lib.burpsuite import BurpSuite
+from lib.constants import UserCrawlType
 
 
-def main():
-  # parse arguments
-  options = Options()
-  (opts, args) = options.parse(sys.argv[1:])
-
+def run_full():
   # start app
-  project = Project(opts)
+  project = Project()
   project.start()
 
-  # 
-  # MODULE 1
-  # 
-  # find login link
-  #   prompt user (input/find with dirsearch)
-  #   identify login link by signatures
-  # 
+  # identify auth url
   auth_url = project.find_auth_link()
 
-  # 
-  # MODULE 2
-  # 
-  # crawl new links with user authen & author
-  #   crawl using no auth
-  #   crawl using normal users
-  #   crawl using admin
-  # 
+  burp = BurpSuite()
+
+  burp.start_burp()
+  time.sleep(30)
 
   #set up proxy for firefox
   directory = Path('tmp')
   directory.mkdir(exist_ok=True)
+  script_p = f"{os.getcwd()}/../app/lib/save_respone.py"
 
   os.chdir(f'./{directory}')
 
-  script_path = "/home/quan/Desktop/oswas/app/lib"
-  cmd = f'qterminal -e mitmdump -s {script_path}/save_respone.py'
+  #cmd = f'qterminal -e mitmdump -s {script_p} --ssl-insecure'
+  cmd = f'qterminal -e mitmdump -s {script_p} --mode upstream:http://127.0.0.1:8888 --ssl-insecure'
   mitmproxy = subprocess.Popen(cmd, shell=True)
 
   proxy = '127.0.0.1:8080'
-
   firefox_capabilities = webdriver.DesiredCapabilities.FIREFOX
   firefox_capabilities['marionette'] = True
   firefox_capabilities['proxy'] = {
@@ -60,46 +48,100 @@ def main():
   }   
   firefox_capabilities['acceptInsecureCerts'] = True
   firefox_capabilities['acceptSslCerts'] = True
-  
+
+  res_noauth = None
+  res_user_1 = None
+  res_user_2 = None
+  res_admin  = None
+  profiles_count = 0
 
   # crawl no authen
   if auth_url is None:
-    res_noauth = project.start_crawler(webdriver.Firefox(capabilities=firefox_capabilities))
+    profiles_count += 1
+    res_noauth = project.start_crawler(
+      None,
+      webdriver.Firefox(capabilities=firefox_capabilities),
+      UserCrawlType.NO_AUTH
+    )
   else:
     driver_user_1 = webdriver.Firefox(capabilities=firefox_capabilities)
-    if project.prompt_login(auth_url, driver_user_1):
-      res_user_1 = project.start_crawler(driver_user_1)
-      res_noauth = project.start_crawler(webdriver.Firefox(capabilities=firefox_capabilities))
-
-      has_user_2 = Utils.yes_no_question('> Do you have another user account?')
-      has_admin = Utils.yes_no_question('> Do you have an admin account?')
+    if Utils.prompt_login(auth_url, driver_user_1):
+      profiles_count += 1
+      res_user_1 = project.start_crawler(
+        auth_url,
+        driver_user_1,
+        UserCrawlType.USER1
+      )
+      profiles_count += 1
+      res_noauth = project.start_crawler(
+        None,
+        webdriver.Firefox(capabilities=firefox_capabilities),
+        UserCrawlType.NO_AUTH
+      )
 
       # crawl with user 2
+      has_user_2 = Utils.yes_no_question('Do you have another user account?')
       if has_user_2:
         driver_user_2 = webdriver.Firefox(capabilities=firefox_capabilities)
-        if project.prompt_login(auth_url, driver_user_2):
-          res_user_2 = project.start_crawler(driver_user_2)
+        if Utils.prompt_login(auth_url, driver_user_2):
+          profiles_count += 1
+          res_user_2 = project.start_crawler(
+            auth_url,
+            driver_user_2,
+            UserCrawlType.USER2
+          )
 
       # crawl with admin
+      has_admin = Utils.yes_no_question('Do you have an admin account?')
       if has_admin:
         driver_admin = webdriver.Firefox(capabilities=firefox_capabilities)
-        if project.prompt_login(auth_url, driver_admin):
-          res_admin = project.start_crawler(driver_admin)
-
-
-  # crawler results
-  if res_noauth: links_noauth = res_noauth['internal_urls']
-  if res_user_1: links_user_1 = res_user_1['internal_urls']
-  if res_user_2: links_user_2 = res_user_2['internal_urls']
-  if res_admin: links_admin = res_admin['internal_urls']
-
-  print('crawl noauth:', len(links_noauth) or 0)
-  print('crawl user 1:', len(links_user_1) or 0)
-  print('crawl user 2:', len(links_user_2) or 0)
-  print('crawl admin:' , len(links_admin) or 0)
+        if Utils.prompt_login(auth_url, driver_admin):
+          profiles_count += 1
+          res_admin = project.start_crawler(
+            auth_url,
+            driver_admin,
+            UserCrawlType.ADMIN
+          )
 
   os.kill(int(mitmproxy.pid), 0)
+  os.chdir("..")
+
+  # update profiles_count
+  project.update_target_profiles(profiles_count)
+
+  # crawler results
+  project.print_output_count(res_noauth, res_user_1, res_user_2, res_admin)
+
+  # create sitemap
+  project.create_sitemap()
+
+  # test for authen + IDOR vulnerabilities
+  directory = Path('testing')
+  directory.mkdir(exist_ok=True)
+  project.add_vulns_to_target(Scanner().run(res_noauth, res_user_1, res_user_2, res_admin))
+
+  # generate scanner report (BurpSuite)
+  burp.gen_report()
+
+  report = Report()
+  report.create_index_page()
+  report.create_report_files()
+  report.start_ui()
+
+
+def run_ui():
+  report = Report()
+  report.create_index_page()
+  report.create_report_files()
+  report.start_ui()
 
 
 if __name__ == "__main__":
-  main()
+  # parse command-line arguments
+  options = Options()
+  (opts, args) = options.parse(sys.argv[1:])
+
+  if opts.view_ui:
+    run_ui()
+  else:
+    run_full()  

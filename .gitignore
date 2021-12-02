@@ -94,3 +94,9 @@ dirsearch
 bin/*.txt
 bin/output
 bin/tmp
+bin/testing
+_test
+
+app/data/report-page/reports
+app/data/report-page/js/reports
+app/data/report-page/js/init.*

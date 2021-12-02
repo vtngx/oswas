@@ -1,18 +1,13 @@
 class TargetStatus:
   DOING   = "DOING"   # mới khởi tạo Target
   DONE    = "DONE"    # đã crawl xong
-  CANCEL  = "CANCEL"  # user hủy giữa chừng
-
-class LinkStatus:
-  TODO  = "TODO"    # link chưa crawl
-  DOING = "DOING"   # link đang crawl
-  DONE  = "DONE"    # link đã crawl xong
+  FAILED  = "FAILED"  # user hủy giữa chừng /failed
 
 class UserCrawlType:
-  USER1   = "USER1"   # crawl as normal user 1
-  USER2   = "USER2"   # crawl as normal user 2
-  ADMIN   = "ADMIN"   # crawl as admin user
-  NO_AUTH = None      # crawl without authen
+  USER1   = "USER1"     # crawl as normal user 1
+  USER2   = "USER2"     # crawl as normal user 2
+  ADMIN   = "ADMIN"     # crawl as admin user
+  NO_AUTH = "NO_AUTH"   # crawl without authen
 
 class InputTypes:
   CHECKBOX = "checkbox"
@@ -35,7 +30,8 @@ class InputTypes:
   WEEK = "week"
 
 AuthKeywords = [
-  'login', 'loginform', 'log in', 'signin', 'sign in', 'dang-nhap', 'Sign in'
+  'Login', 'Log in' , 'login', 'loginform' , 'log in', '/login', 'Sign In',  'Sign in' , 'signin',
+  'sign in', 'sign_in', '/sign_in', 'Đăng nhập', 'dang-nhap'
 ]
 
 BLACKLIST = [
