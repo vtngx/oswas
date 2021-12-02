@@ -7,6 +7,15 @@ from .constants import UserCrawlType, AuthKeywords
 from urllib.parse import urlparse, parse_qsl, unquote_plus
 
 class Utils:
+  @staticmethod
+  def print_banner():
+    print("  ___   ____ __        __ _     ____  ")
+    print(" / _ \ / ___|\ \      / // \   / ___| ")
+    print("| | | |\___ \ \ \ /\ / // _ \  \___ \ ")
+    print("| |_| | ___) | \ V  V // ___ \  ___) |")
+    print(" \___/ |____/   \_/\_//_/   \_\|____/   v1.0")
+    print("\nOptimized Solutions for Web-App Scanners")
+    print("________________________________________\n\n")
 
   @staticmethod
   def eq_urls(url1, url2):
@@ -27,9 +36,6 @@ class Utils:
     keywords = AuthKeywords
     html_output_name = urlparse(url).scheme
 
-    # TODO: issues
-    # - ko check đc code của navbar/footer/...
-    # - có ký tự ko encode được trên windows
     res = requests.get(url)
     html_doc = res.text
 
@@ -70,8 +76,8 @@ class Utils:
 
     if len(lines) <= limit:
       c = input(
-        Back.WHITE +\
-        Fore.BLACK +\
+        Back.BLACK +\
+        Fore.WHITE +\
         f'\nSelect link to login (1-{i}) or 0 if you cannot find one:' +\
         Style.RESET_ALL +\
         ' '
@@ -88,22 +94,22 @@ class Utils:
         i = limit + i
         if i == len(lines) - 1:
           print(
-            Back.WHITE +\
-            Fore.BLACK +\
+            Back.BLACK +\
+            Fore.WHITE +\
             'END OF LINKS' +\
             Style.RESET_ALL
           )
           c = input(
-            Back.WHITE +\
-            Fore.BLACK +\
+            Back.BLACK +\
+            Fore.WHITE +\
             f'Output page line 1-{i}/{len(lines)-1} - Select link to login (1-{i}) / 0 or ENTER if you cannot find one:' +\
             Style.RESET_ALL +\
             ' '
           )
         else:
           c = input(
-            Back.WHITE +\
-            Fore.BLACK +\
+            Back.BLACK +\
+            Fore.WHITE +\
             f'Output page line 1-{i}/{len(lines)-1} - Select link to login (1-{i}) / 0 if you cannot find one / ENTER to view more:' +\
             Style.RESET_ALL +\
             ' '
@@ -145,7 +151,7 @@ class Utils:
   def yes_no_question(question):
     os.system("clear")
     answer = input(
-      Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
+      Back.BLACK + Fore.WHITE + ' > ' + Style.RESET_ALL +\
       f' {question} (y/n): '
     ).strip()
     print("")
@@ -153,7 +159,7 @@ class Utils:
                answer == "n" or answer == "no"):
       print("Input (yes/y) or (no/n)")
       answer = input(
-        Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
+        Back.BLACK + Fore.WHITE + ' > ' + Style.RESET_ALL +\
         f' {question} (y/n): '
       ).strip()
     if answer[0] == "y":

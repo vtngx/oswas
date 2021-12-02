@@ -43,7 +43,7 @@ class Scanner:
       self.scan_hrz_idor(links_user1, links_user2)
     
     res = [i for n, i in enumerate(self.VULN_LINKS) if i not in self.VULN_LINKS[n + 1:]]
-    print("\nVulns:", len(res))
+    print(f"\nVulns: {len(res)}\n\n")
     return res
 
 
@@ -156,20 +156,25 @@ class Scanner:
           res_t = requests.get(url, headers=test_header, json=json_data, params=params)
 
         if perform_test:
+          is_vuln = False
           # compare respinse text difference
           diff_amount = SequenceMatcher(None, res_o.text, res_t.text).ratio() * 100
-          print(f'{method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}')
 
           # add to vuln list if 2 responses are >= 70% similar 
           if res_t.status_code < 400:
             if diff_amount > self.MIN_DIFF_PERCENTAGE:
-              print(f'POSSIBLE AUTH VULN: {method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}')
+              is_vuln = True
               self.VULN_LINKS.append({
                 "type": "AUTHEN_VULN",
                 "link": link["url"],
                 "vuln_link": f"{method} {url}",
                 "diff": diff_amount
               })
+
+          if is_vuln:
+            print(Fore.RED + f'{method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}' + Style.RESET_ALL)
+          else:
+            print(f'{method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}')
 
         os.remove(FILE)
         os.remove(f"testing_{FILE}")

@@ -9,13 +9,13 @@ class Options:
     usage = 'bin/oswas'
     self.parser = OptionParser(usage=usage)
 
-    self.parser.add_option(
-      '-s', '--single',
-      action="store_true",
-      default=False,
-      dest='single',
-      help='single mode - crawl & scan only with 1 browser'
-    )
+    # self.parser.add_option(
+    #   '-s', '--single',
+    #   action="store_true",
+    #   default=False,
+    #   dest='single',
+    #   help='single mode - crawl & scan only with 1 browser'
+    # )
 
     self.parser.add_option(
       '-v', '--view-ui',

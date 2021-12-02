@@ -1,3 +1,15 @@
+#   ___  ______        ___    ____  
+#  / _ \/ ___\ \      / / \  / ___| 
+# | | | \___ \\ \ /\ / / _ \ \___ \ 
+# | |_| |___) |\ V  V / ___ \ ___) |
+#  \___/|____/  \_/\_/_/   \_\____/ 
+#
+# _________________________________________
+# Optimized Solutions for Web-App Scanners
+# FPTU IA Capstone Project
+# _________________________________________
+
+
 import os
 import sys
 import time
@@ -140,6 +152,9 @@ if __name__ == "__main__":
   # parse command-line arguments
   options = Options()
   (opts, args) = options.parse(sys.argv[1:])
+
+  os.system("clear")
+  Utils.print_banner()
 
   if opts.view_ui:
     run_ui()

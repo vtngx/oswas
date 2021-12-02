@@ -34,12 +34,10 @@ class Project:
 
   # start function
   def start(self):
-    os.system('clear')
-
     while True:
       self.start_url = input(
-        Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
-        ' Enter the URL: '
+        Back.BLACK + Fore.WHITE + ' > ' + Style.RESET_ALL +\
+        ' Enter Web URL to start: '
       )
 
       if self.start_url:
@@ -51,6 +49,7 @@ class Project:
           "domain": urlparse(self.start_url).netloc,
           "status": TargetStatus.DOING,
           "started_at": str(datetime.datetime.utcnow()),
+          "profiles": 0,
           "vulns": []
         })
         os.makedirs(f"output/{self.Target}", exist_ok=True)
@@ -66,8 +65,8 @@ class Project:
 
     # prompt user to input auth_link
     choice = input(
-      Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
-      ' Do you have login page? (y/N): '
+      Back.BLACK + Fore.WHITE + ' > ' + Style.RESET_ALL +\
+      ' Do you have URL of this Website\'s login page? (y/N): '
     )
 
     if not choice:
@@ -75,8 +74,8 @@ class Project:
     
     if choice.lower() == 'y':
       auth_url = input(
-        Back.WHITE + Fore.BLACK + ' > ' + Style.RESET_ALL +\
-        ' Please enter login page: '
+        Back.BLACK + Fore.WHITE + ' > ' + Style.RESET_ALL +\
+        ' Please enter URL of login page: '
       )
     elif choice.lower() == 'n':
       tmp = urlparse(url).netloc
@@ -96,7 +95,7 @@ class Project:
         auth_url = Utils.pager_input(ds_links, 20)
       else:
         print(
-          Back.WHITE + Fore.BLACK + ' !!! ' + Style.RESET_ALL +\
+          Back.RED + Fore.BLACK + ' !!! ' + Style.RESET_ALL +\
           " 0 LINKS FOUND FROM DIRSEARCH"
         )
 
@@ -315,9 +314,9 @@ class Project:
   def start_crawler(self, auth_url, driver, user_type: UserCrawlType):
     os.system("clear")
     print(
-      Back.GREEN + Fore.BLACK + 'START CRAWLER' + Style.RESET_ALL +\
+    Back.GREEN + Fore.BLACK + 'START CRAWLER' + Style.RESET_ALL +\
       f" {self.start_url} | " +\
-      Back.MAGENTA + Fore.BLACK + 'PROFILE' + Style.RESET_ALL +\
+      Back.LIGHTMAGENTA_EX + Fore.BLACK + 'PROFILE' + Style.RESET_ALL +\
       f" {user_type}\n"
     )
 
@@ -357,7 +356,7 @@ class Project:
     print(
       Back.GREEN + Fore.BLACK + 'CRAWL DONE' + Style.RESET_ALL +\
       f" {self.start_url} | " +\
-      Back.MAGENTA + Fore.BLACK +\
+      Back.LIGHTMAGENTA_EX + Fore.BLACK +\
       f" {profiles_count} PROFILES " +\
       Style.RESET_ALL + "\n"
     )
