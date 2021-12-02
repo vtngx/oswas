@@ -17,5 +17,13 @@ class Options:
       help='single mode - crawl & scan only with 1 browser'
     )
 
+    self.parser.add_option(
+      '-v', '--view-ui',
+      action="store_true",
+      default=False,
+      dest='view_ui',
+      help='View UI - view reports on Web UI'
+    )
+
   def parse(self, args=None):
     return self.parser.parse_args(args)

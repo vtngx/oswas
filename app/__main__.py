@@ -12,13 +12,9 @@ from lib.burpsuite import BurpSuite
 from lib.constants import UserCrawlType
 
 
-def main():
-  # parse arguments
-  options = Options()
-  (opts, args) = options.parse(sys.argv[1:])
-
+def run_full():
   # start app
-  project = Project(opts)
+  project = Project()
   project.start()
 
   # identify auth url
@@ -134,5 +130,19 @@ def main():
   report.start_ui()
 
 
+def run_ui():
+  report = Report()
+  report.create_index_page()
+  report.create_report_files()
+  report.start_ui()
+
+
 if __name__ == "__main__":
-  main()
+  # parse command-line arguments
+  options = Options()
+  (opts, args) = options.parse(sys.argv[1:])
+
+  if opts.view_ui:
+    run_ui()
+  else:
+    run_full()

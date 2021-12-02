@@ -1,9 +1,11 @@
 import os
 from pymongo import MongoClient
+from dotenv.main import load_dotenv
 
 class Database:
 
   def __init__(self):
+    load_dotenv()
     self.db = self._connect()
     self.Links = self.db['links']
     self.Targets = self.db['targets']

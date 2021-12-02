@@ -22,20 +22,14 @@ from selenium.webdriver.support import expected_conditions as EC
 
 class Project:
 
-  def __init__(self, options):
+  def __init__(self):
     load_dotenv()
     colorama.init()
-    self.options = options
     self.db = Database()
     self.Target = None
     self.auth_url = None
     self.MAX_TRIES = 1
     self.MAX_WAIT = 2.5
-
-
-  # get arguments
-  def get_args(self):
-    return self.options
 
 
   # start function
