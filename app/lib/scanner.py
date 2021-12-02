@@ -10,8 +10,8 @@ class Scanner:
   def __init__(self) -> None:
     self.MIN_DIFF_PERCENTAGE = 75
     self.VULN_LINKS = []
-    self.AUTH_HEADER = 'Authorization'
-    self.COOKIE_HEADER = 'Cookie'
+    self.AUTH_HEADER = 'authorization'
+    self.COOKIE_HEADER = 'cookie'
     self.CSRF_SIG = ["csrf-token", "csrf_token", "token"]
 
     self.cwd = f'{os.getcwd()}/'
@@ -67,7 +67,8 @@ class Scanner:
             url = PurePath(r).name.replace("\\\\", "://")
             os.chdir(r)
             with open(file) as content:
-              if self.AUTH_HEADER in content.read() or self.COOKIE_HEADER in content.read():
+              content_l = content.read().lower()
+              if self.AUTH_HEADER in content_l or self.COOKIE_HEADER in content_l:
                 shutil.copy(os.path.join(r, file), self.testing_path)
                 AUTH_FILES.append({
                   "url": url,
@@ -84,8 +85,12 @@ class Scanner:
         with open(FILE, "r") as f_origin:
           lines = f_origin.read().splitlines()
 
+          if lines[0].split()[1].startswith('http'):
+            url = lines[0].split()[1]
+          else:
+            url = URL + lines[0].split()[1]
+
           method = lines[0].split()[0]
-          url = URL + lines[0].split()[1]
           is_header = True
 
           for line in lines[1:]:
@@ -123,7 +128,8 @@ class Scanner:
         with open(f"testing_{FILE}", "w") as f_noauth:
           tmp = None
           for line in lines:
-            if line.startswith(self.AUTH_HEADER) or line.startswith(self.COOKIE_HEADER):
+            line_l = line.lower()
+            if line_l.startswith(self.AUTH_HEADER) or line_l.startswith(self.COOKIE_HEADER):
               tmp = line
             if line != tmp:
               f_noauth.write('{}\n'.format(line))
@@ -167,7 +173,6 @@ class Scanner:
 
         os.remove(FILE)
         os.remove(f"testing_{FILE}")
-        os.remove(f'request_{FILE}')
       os.chdir(self.cwd)
 
 
@@ -184,11 +189,12 @@ class Scanner:
             if '.txt' in file:
               os.chdir(r)
               with open(file, "r") as content:
-                content = content.read()
-                if self.AUTH_HEADER in content or self.COOKIE_HEADER in content:
-                  lines = content.splitlines()
+                content_l = content.read().lower()
+                if self.AUTH_HEADER in content_l or self.COOKIE_HEADER in content_l:
+                  lines = content.read().splitlines()
                   for line in lines:
-                    if line.startswith(self.AUTH_HEADER) or line.startswith(self.COOKIE_HEADER):
+                    line_l = line.lower()
+                    if line_l.startswith(self.AUTH_HEADER) or line_l.startswith(self.COOKIE_HEADER):
                       x = line.split(':', 1)
                       headers.append({
                         "h": x[0].strip(),
@@ -220,18 +226,19 @@ class Scanner:
               url = PurePath(r).name.replace("\\\\", "://")
               os.chdir(r)
               with open(file) as content:
-                content = content.read()
+                content_l = content.read().lower()
 
                 # check if request has CSRF token
                 has_csrf = False
-                lines = content.splitlines()
+                lines = content.read().splitlines()
                 for line in lines:
-                  if any(word in line for word in self.CSRF_SIG):
+                  line_l = line.lower()
+                  if any(word in line_l for word in self.CSRF_SIG):
                     has_csrf = True
                 
                 if not has_csrf:
                   # check if request file has auth/cookie header
-                  if self.AUTH_HEADER in content or self.COOKIE_HEADER in content:
+                  if self.AUTH_HEADER in content_l or self.COOKIE_HEADER in content_l:
                     shutil.copy(os.path.join(r, file), self.testing_path)
                     TEST_FILES.append({
                       "url": url,
@@ -289,7 +296,8 @@ class Scanner:
             # create testing request files - add custom auth headers
             with open(test_file, "w") as f_test:
               for line in lines:
-                if line.startswith(self.AUTH_HEADER) or line.startswith(self.COOKIE_HEADER):
+                line_l = line.lower()
+                if line_l.startswith(self.AUTH_HEADER) or line_l.startswith(self.COOKIE_HEADER):
                   f_test.write(f'{header["h"]}: {header["c"]}\n')
                 else:
                   f_test.write(f'{line}\n')
@@ -335,7 +343,6 @@ class Scanner:
 
             os.remove(test_file)
           os.remove(FILE)
-          os.remove(f'request_{FILE}')
         os.chdir(self.cwd)
 
 
