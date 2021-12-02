@@ -20,17 +20,17 @@ def run_full():
   # identify auth url
   auth_url = project.find_auth_link()
 
+  burp = BurpSuite()
+
+  burp.start_burp()
+  time.sleep(30)
+
   #set up proxy for firefox
   directory = Path('tmp')
   directory.mkdir(exist_ok=True)
   script_p = f"{os.getcwd()}/../app/lib/save_respone.py"
 
   os.chdir(f'./{directory}')
-
-  burp = BurpSuite()
-
-  burp.start_burp()
-  time.sleep(30)
 
   #cmd = f'qterminal -e mitmdump -s {script_p} --ssl-insecure'
   cmd = f'qterminal -e mitmdump -s {script_p} --mode upstream:http://127.0.0.1:8888 --ssl-insecure'
@@ -111,7 +111,6 @@ def run_full():
 
   # crawler results
   project.print_output_count(res_noauth, res_user_1, res_user_2, res_admin)
-  BurpSuite().genReport()
 
   # create sitemap
   project.create_sitemap()
@@ -145,4 +144,4 @@ if __name__ == "__main__":
   if opts.view_ui:
     run_ui()
   else:
-    run_full()
+    run_full()  

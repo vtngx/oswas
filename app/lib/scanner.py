@@ -167,6 +167,7 @@ class Scanner:
 
         os.remove(FILE)
         os.remove(f"testing_{FILE}")
+        os.remove(f'request_{FILE}')
       os.chdir(self.cwd)
 
 
@@ -334,6 +335,7 @@ class Scanner:
 
             os.remove(test_file)
           os.remove(FILE)
+          os.remove(f'request_{FILE}')
         os.chdir(self.cwd)
 
 
