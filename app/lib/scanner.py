@@ -165,16 +165,16 @@ class Scanner:
             if diff_amount > self.MIN_DIFF_PERCENTAGE:
               is_vuln = True
               self.VULN_LINKS.append({
-                "type": "AUTHEN_VULN",
+                "type": "Authentication Vulnerability",
                 "link": link["url"],
                 "vuln_link": f"{method} {url}",
                 "diff": diff_amount
               })
 
           if is_vuln:
-            print(Fore.RED + f'{method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}' + Style.RESET_ALL)
+            print(Fore.RED + f'FOUND AUTH. VULN: {method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}' + Style.RESET_ALL)
           else:
-            print(f'{method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}')
+            print(f'TESTING AUTH. VULN: {method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}')
 
         os.remove(FILE)
         os.remove(f"testing_{FILE}")
@@ -194,9 +194,10 @@ class Scanner:
             if '.txt' in file:
               os.chdir(r)
               with open(file, "r") as content:
-                content_l = content.read().lower()
+                content = content.read()
+                content_l = content.lower()
                 if self.AUTH_HEADER in content_l or self.COOKIE_HEADER in content_l:
-                  lines = content.read().splitlines()
+                  lines = content.splitlines()
                   for line in lines:
                     line_l = line.lower()
                     if line_l.startswith(self.AUTH_HEADER) or line_l.startswith(self.COOKIE_HEADER):
@@ -231,11 +232,12 @@ class Scanner:
               url = PurePath(r).name.replace("\\\\", "://")
               os.chdir(r)
               with open(file) as content:
-                content_l = content.read().lower()
+                content = content.read()
+                content_l = content.lower()
 
                 # check if request has CSRF token
                 has_csrf = False
-                lines = content.read().splitlines()
+                lines = content.splitlines()
                 for line in lines:
                   line_l = line.lower()
                   if any(word in line_l for word in self.CSRF_SIG):
@@ -330,21 +332,26 @@ class Scanner:
               res_t = requests.get(url, headers=test_header, json=json_data, params=params)
 
             if perform_test:
+              is_vuln = False
               # compare respinse text difference
               diff_amount = SequenceMatcher(None, res_o.text, res_t.text).ratio() * 100
-              print(f'{method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}')
 
               # add to vuln list if 2 responses are >= 70% similar
               # & status code != 401 and 403
               if res_t.status_code < 400:
                 if diff_amount > self.MIN_DIFF_PERCENTAGE:
-                  print(f'POSSIBLE {type}: {method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}')
+                  is_vuln = True
                   self.VULN_LINKS.append({
-                    "type": "VERT. IDOR",
+                    "type": type,
                     "link": link["url"],
                     "vuln_link": f"{method} {url}",
                     "diff": diff_amount
                   })
+
+              if is_vuln:
+                print(Fore.RED + f'FOUND IDOR. VULN: {method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}' + Style.RESET_ALL)
+              else:
+                print(f'TESTING IDOR. VULN: {method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}')
 
             os.remove(test_file)
           os.remove(FILE)
@@ -355,11 +362,11 @@ class Scanner:
     # get links only admin user can access
     diff_links = self.get_diff(links_admin, links_user)
     # scan vertical IDOR
-    self.scan_idor(diff_links, links_user, "VTC. IDOR")
+    self.scan_idor(diff_links, links_user, "Vertical IDOR")
 
 
   def scan_hrz_idor(self, links_user1, links_user2):
     # test IDOR for user 1
-    self.scan_idor(links_user1, links_user2, "HRZ. IDOR")
+    self.scan_idor(links_user1, links_user2, "Horizontal IDOR")
     # test IDOR for user 2
-    self.scan_idor(links_user2, links_user1, "HRZ. IDOR")
+    self.scan_idor(links_user2, links_user1, "Horizontal IDOR")

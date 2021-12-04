@@ -245,7 +245,6 @@ class Project:
 
     while True:
       # Open the first link we found in new tab
-      # new_link la ten folder dang crawl
       new_link = links.get()
       print(
         Back.YELLOW + Fore.BLACK + 'CRAWL' + Style.RESET_ALL +\

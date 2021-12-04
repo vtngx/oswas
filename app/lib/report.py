@@ -76,7 +76,7 @@ class Report():
 
   def start_ui(self):
     os.chdir("../app/data/report-page")
-    if os.path.isdir("./node_modules"):
-      os.system("rm -r node_modules")
-    os.system("npm install -s")
+    # if os.path.isdir("./node_modules"):
+    #   os.system("rm -r node_modules")
+    # os.system("npm install -s")
     os.system("npm start")
