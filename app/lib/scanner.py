@@ -8,7 +8,7 @@ from colorama.ansi import Back, Fore, Style
 
 class Scanner:
   def __init__(self) -> None:
-    self.MIN_DIFF_PERCENTAGE = 75
+    self.MIN_DIFF_PERCENTAGE = 70
     self.VULN_LINKS = []
     self.AUTH_HEADER = 'authorization'
     self.COOKIE_HEADER = 'cookie'
@@ -157,7 +157,7 @@ class Scanner:
 
         if perform_test:
           is_vuln = False
-          # compare respinse text difference
+          # compare response text difference
           diff_amount = SequenceMatcher(None, res_o.text, res_t.text).ratio() * 100
 
           # add to vuln list if 2 responses are >= 70% similar 
@@ -262,8 +262,12 @@ class Scanner:
           with open(FILE, "r") as f_origin:
             lines = f_origin.read().splitlines()
 
+            if lines[0].split()[1].startswith('http'):
+              url = lines[0].split()[1]
+            else:
+              url = URL + lines[0].split()[1]
+
             method = lines[0].split()[0]
-            url = URL + lines[0].split()[1]
             is_header = True
 
             for line in lines[1:]:
@@ -333,7 +337,7 @@ class Scanner:
 
             if perform_test:
               is_vuln = False
-              # compare respinse text difference
+              # compare response text difference
               diff_amount = SequenceMatcher(None, res_o.text, res_t.text).ratio() * 100
 
               # add to vuln list if 2 responses are >= 70% similar

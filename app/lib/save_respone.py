@@ -24,4 +24,7 @@ def request(flow):
 
     #write decode request into file for later analysis
     with open(name, 'w') as f:
-        f.write(assemble_request(request_data).decode('utf-8'))
+        try:
+            f.write(assemble_request(request_data).decode('utf-8'))
+        except:
+            print('Decode UTF-8 faild.')
