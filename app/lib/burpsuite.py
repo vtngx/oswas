@@ -26,3 +26,11 @@ class BurpSuite:
 
     #open report page
     webbrowser.open('http://localhost:8090/burp/report?reportType=HTML', new=2)
+
+
+  def get_status_code(self):
+    try:
+        response = requests.get('http://localhost:8090/v2/api-docs')
+        return 200
+    except:
+        return 500

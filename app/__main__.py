@@ -34,8 +34,11 @@ def run_full():
 
   burp = BurpSuite()
 
-  burp.start_burp()
-  time.sleep(30)
+  if burp.get_status_code() != 200:
+    burp.start_burp()
+    
+  while(burp.get_status_code() != 200):
+    time.sleep(1)
 
   #set up proxy for firefox
   directory = Path('tmp')
