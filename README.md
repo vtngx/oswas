@@ -69,8 +69,18 @@ java -noverify -javaagent:<burploader.jar> -cp "$CLASSPATH" org.springframework.
 ```
 
 ## **Running**
-Start running OSWAS by running:
+Start OSWAS by running:
 ```
 cd bin/
 ./oswas
+```
+
+OSWAS can run in 2 modes
+* Full functions (crawl, scan, view report)
+```
+./oswas
+```
+* View report
+```
+./oswas -v
 ```
