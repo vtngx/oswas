@@ -5,10 +5,10 @@ class Report():
   def __init__(self) -> None:
     self.db = Database()
     self.targets = self.db.get_all_targets()
-    if not os.path.isdir("../app/data/report-page/reports"):
-      os.mkdir("../app/data/report-page/reports")
-    if not os.path.isdir("../app/data/report-page/js/reports"):
-      os.mkdir("../app/data/report-page/js/reports")
+    if not os.path.isdir("../app/ui/reports"):
+      os.mkdir("../app/ui/reports")
+    if not os.path.isdir("../app/ui/js/reports"):
+      os.mkdir("../app/ui/js/reports")
 
 
   def create_index_page(self):
@@ -23,9 +23,9 @@ class Report():
     js_var += "]\n"
     
     js = ""
-    with open(f"../app/data/report-page/templates/init.js.txt", "r") as f:
+    with open(f"../app/ui/templates/init.js.txt", "r") as f:
       js = f.read()
-    with open(f"../app/data/report-page/js/init.js", "w") as f:
+    with open(f"../app/ui/js/init.js", "w") as f:
       f.writelines(js_var)
       f.writelines(js)
 
@@ -43,7 +43,7 @@ class Report():
         if "profiles" in target: profiles = str(target["profiles"])
         else: profiles = "0"
 
-        with open(f"../app/data/report-page/js/reports/init_{_id}.js", "w") as f:
+        with open(f"../app/ui/js/reports/init_{_id}.js", "w") as f:
           js = f'document.getElementById("target-url").innerHTML = \"{start_url}\";\ndocument.getElementById("target-date").innerHTML = \"{started_at}\";\ndocument.getElementById("target-profiles").innerHTML = \"{profiles}\";\ndocument.getElementById("target-links").innerHTML = \"{links_count}\";\ndocument.getElementById("target-status").innerHTML = \"{status}\";\n\n'
           
           # write list vulns
@@ -54,7 +54,7 @@ class Report():
               vuln_link = str(vuln["vuln_link"]).replace('"', '\\"').replace("'", "\\'").replace("\\", "/")
               js +=  '{ type: \"' + str(vuln["type"]) + '\", link: \"' + link + '\", vuln_link: \"' + vuln_link + '\" },\n'
             js += ']\n\n'
-            with open(f"../app/data/report-page/templates/init_report.js.txt", "r") as ft:
+            with open(f"../app/ui/templates/init_report.js.txt", "r") as ft:
               js += ft.read()
           else:
             js += 'document.getElementById("vulns").innerHTML = "<div class=\\"row\\">\\n<div class=\\"col\\">\\n<div class=\\"card border-left-dark shadow pt-4 pb-3 pl-4\\">\\n<h5>No IDOR/Authentication Vulnerabilites Found</h5>\\n</div>\\n</div>\\n</div>\\n"\n\n'
@@ -67,15 +67,15 @@ class Report():
           f.writelines(js)
 
         html = ""
-        with open(f"../app/data/report-page/templates/report.html.txt", "r") as f:
+        with open(f"../app/ui/templates/report.html.txt", "r") as f:
           html = f.read()
-        with open(f"../app/data/report-page/reports/report_{_id}.html", "w") as f:
+        with open(f"../app/ui/reports/report_{_id}.html", "w") as f:
           f.writelines(html)
           f.writelines(f"<script src=\"../js/reports/init_{_id}.js\"></script>\n</body>\n</html>\n")
 
 
   def start_ui(self):
-    os.chdir("../app/data/report-page")
+    os.chdir("../app/ui")
     # if os.path.isdir("./node_modules"):
     #   os.system("rm -r node_modules")
     # os.system("npm install -s")

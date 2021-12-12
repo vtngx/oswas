@@ -166,10 +166,5 @@ class Sitemap():
       self.save()
 
     def save(self):
-      # js = ""
-      # with open(f"../../../app/data/report-page/templates/init.js.txt", "r") as f:
-      #   js = f.read()
-      # with open(f"../app/data/report-page/js/init.js", "w") as f:
-      #   f.writelines(js)
       with open(f"init_sitemap", "w") as f:
         f.writelines(self.js_string)

@@ -1,11 +1,9 @@
 import os
 from pymongo import MongoClient
-from dotenv.main import load_dotenv
 
 class Database:
 
   def __init__(self):
-    load_dotenv()
     self.db = self._connect()
     self.Links = self.db['links']
     self.Targets = self.db['targets']
@@ -16,12 +14,12 @@ class Database:
     return client['oswas']
   
   def create_target(self, target):
-    data = self.Targets.insert(target)
-    return data 
+    data = self.Targets.insert_one(target)
+    return data.inserted_id
 
   def create_link(self, link):
-    data = self.Links.insert(link)
-    return data
+    data = self.Links.insert_one(link)
+    return data.inserted_id
 
   def create_links_multi(self, links):
     if len(links) != 0:
@@ -29,13 +27,12 @@ class Database:
       return data
 
   def update_target(self, target_id, update_data):
-    data = self.Targets.update(
+    self.Targets.update_one(
       { '_id': target_id },
       {
         '$set': update_data,
       }
     )
-    return data
 
   def get_output_links(self, target_id, user_type):
     links = self.Links.find({
