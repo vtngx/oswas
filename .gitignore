@@ -87,3 +87,16 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+dirsearch
+.idea
+
+bin/*.txt
+bin/output
+bin/tmp
+bin/testing
+_test
+
+app/ui/reports
+app/ui/js/reports
+app/ui/js/init.*

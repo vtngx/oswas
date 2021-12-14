@@ -1,0 +1,7 @@
+var output = ""
+if (targets.length) {
+    targets.forEach(target => {
+        output += `<div class=\"row\"><div class=\"col mb-3\"><div class=\"card border-left-success shadow h-100\"><div class=\"card-body\"><div class=\"row no-gutters align-items-center\"><div class=\"col-8\"><div class=\"text-xs font-weight-bold text-success text-uppercase mb-1\">URL</div><div class=\"h5 mb-0 font-weight-bold text-gray-800\"><a href=\"reports/report_${target._id}.html\">${target.start_url}</a></div></div><div class=\"col-2\"><div class=\"text-xs font-weight-bold text-success text-uppercase mb-1\">Date</div><div class=\"h6 mb-0 font-weight-bold text-gray-800\">${target.started_at}</div></div><div class=\"col-2\"><div class=\"text-xs font-weight-bold text-success text-uppercase mb-1\">Status</div><div class=\"h6 mb-0 font-weight-bold text-gray-800\">${target.status}</div></div></div></div></div></div></div>`
+    })
+}
+document.getElementById("targets").innerHTML = output
