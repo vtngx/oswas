@@ -63,9 +63,9 @@ Assign MONGO_URI with your MongoDB URI then hit CTRL-X + Y + Enter to save .env 
 Then, download burploader and Burp Suite from [this link](https://drive.google.com/drive/folders/1vu9Am2yAezt9cYgs7j-_ojQbCHFYORuU?usp=sharing), extract and move the extracted files to `bin/burp` directory. Go to `bin/burp` directory, edit file `burp-rest-api.sh`:
 ```shell
 # edit line 4
-# put your absulute path to burploader.jar into <burploader.jar>
+# put your absulute path to burploader.jar into <path to burploader.jar>
 
-java -noverify -javaagent:<burploader.jar> -cp "$CLASSPATH" org.springframework.boot.loader.JarLauncher $@
+java -noverify -javaagent:<path to burploader.jar> -cp "$CLASSPATH" org.springframework.boot.loader.JarLauncher $@
 ```
 
 ## **Running**
