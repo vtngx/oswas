@@ -47,8 +47,7 @@ class Sitemap():
         temp = "/" + "/".join(temp) + "/"
         return temp
       else:
-        temp = url.split("/")[1:-2]
-        temp = "/" + "/".join(temp) + "/"
+        temp = "/" + "/".join(url.split("/")[1:-2]) + "/"
         return temp
 
     def add_to_tree(self, url):

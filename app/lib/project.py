@@ -26,7 +26,7 @@ class Project:
     load_dotenv()
     colorama.init()
     self.db = Database()
-    self.Target = None
+    self.TARGET = None
     self.auth_url = None
     self.MAX_TRIES = 1
     self.MAX_WAIT = 2.5
@@ -43,7 +43,7 @@ class Project:
       if self.start_url:
         if not self.start_url.endswith("/"):
           self.start_url += "/"
-        self.Target = self.db.create_target({
+        self.TARGET = self.db.create_target({
           "start_url": self.start_url,
           "auth_url": None,
           "domain": urlparse(self.start_url).netloc,
@@ -52,7 +52,7 @@ class Project:
           "profiles": 0,
           "vulns": []
         })
-        os.makedirs(f"output/{self.Target}", exist_ok=True)
+        os.makedirs(f"output/{self.TARGET}", exist_ok=True)
         break
       else:
         print(Fore.RED + 'PLEASE INPUT VALID URL' + Style.RESET_ALL)
@@ -80,15 +80,14 @@ class Project:
     elif choice.lower() == 'n':
       tmp = urlparse(url).netloc
       if tmp == '':
-        parseUrl = url
+        parse_url = url
       else:
-        parseUrl = tmp
+        parse_url = tmp
 
       # find links using dirsearch
-      ds = Dirsearch(url, parseUrl)
+      ds = Dirsearch(url, parse_url)
       ds._run()
-      ds_links = ds.getURL()
-      # ds_links = []
+      ds_links = ds.get_url()
 
       if len(ds_links):
         # ask user to find login_url from list
@@ -106,7 +105,7 @@ class Project:
     # update auth_url of Target
     if auth_url:
       self.auth_url = auth_url
-      self.db.update_target(self.Target, { 'auth_url': auth_url })
+      self.db.update_target(self.TARGET, { 'auth_url': auth_url })
 
     return auth_url   # returns None or login link
 
@@ -119,14 +118,13 @@ class Project:
       all_a_tags = WebDriverWait(driver, 10).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a"))
       )
-    except:
+    except Exception:
       all_a_tags = []
 
     for a_tag in all_a_tags:
       try:
         href = a_tag.get_attribute("href")
-      except Exception as e:
-      #   print(e)
+      except Exception:
         pass
 
       if not href:
@@ -187,16 +185,13 @@ class Project:
       for element in elements_to_fill:
         # fill select boxes
         if element.type == 'select':
-          select = element.element
-          form_spider.fill_select(select)
+          form_spider.fill_select(element.element)
         # fill inputs
         elif element.type == 'input':
-          input = element.element
-          form_spider.fill_input(input)
+          form_spider.fill_input(element.element)
         # fill textareas
         elif element.type == 'textarea':
-          textarea = element.element
-          form_spider.fill_textarea(textarea)
+          form_spider.fill_textarea(element.element)
         
       # find submit buttons/inputs
       submits = form_spider.find_elements_submit()
@@ -216,7 +211,7 @@ class Project:
               .click(submit_element)\
               .pause(5)\
               .perform()
-          except:
+          except Exception:
             pass
       
       # get number of open tabs
@@ -230,15 +225,14 @@ class Project:
           self.internal_urls.add(driver.current_url)
           driver.close()
         driver.switch_to.window(driver.window_handles[1])
-    except Exception as e:
-      # print(e)
+    except Exception:
       pass
 
 
   def crawl(self, url, driver, user_type):
     # remove redundant files im /tmp
     os.system("rm -rf *")
-    os.mkdir(f"../output/{self.Target}/{user_type}")
+    os.mkdir(f"../output/{self.TARGET}/{user_type}")
 
     # crawl a web page and get all links
     links = self.get_all_website_links(url, driver)
@@ -278,10 +272,10 @@ class Project:
 
         # mapping link - traffic files
         new_link_id = ObjectId()
-        traffic_path = Utils.map_link_traffic(new_link, str( self.Target), str(new_link_id), user_type)
+        traffic_path = Utils.map_link_traffic(new_link, str( self.TARGET), str(new_link_id), user_type)
         self.db_links.append({
           "_id": new_link_id,
-          "target_id": self.Target,
+          "target_id": self.TARGET,
           "url": new_link,
           "user": user_type,
           "traffic_file": traffic_path,
@@ -297,8 +291,7 @@ class Project:
           f" {new_link}"
         )
         self.done_links.append(new_link)
-      except Exception as e:
-        # print(e)
+      except Exception:
         print(
           Back.RED + Fore.BLACK + 'FAIL' + Style.RESET_ALL +\
           f" {new_link}"
@@ -306,7 +299,7 @@ class Project:
 
       if links.empty():
         self.db.create_links_multi(self.db_links)
-        self.db.update_target(self.Target, { 'status': TargetStatus.DONE })
+        self.db.update_target(self.TARGET, { 'status': TargetStatus.DONE })
         return
 
 
@@ -328,7 +321,7 @@ class Project:
     if auth_url and not Utils.eq_urls(auth_url, self.start_url):
       self.db_links.append({
         "_id": ObjectId(),
-        "target_id": self.Target,
+        "target_id": self.TARGET,
         "url": auth_url,
         "user": user_type,
         "traffic_file": None,
@@ -338,7 +331,7 @@ class Project:
     self.crawl(self.start_url, driver, user_type)
     driver.close()
 
-    crawled_links = self.db.get_output_links(self.Target, user_type)
+    crawled_links = self.db.get_output_links(self.TARGET, user_type)
 
     return crawled_links
 
@@ -367,8 +360,8 @@ class Project:
 
   
   def create_sitemap(self):
-    os.chdir(f"output/{self.Target}")
-    links = self.db.get_all_target_links(self.Target)
+    os.chdir(f"output/{self.TARGET}")
+    links = self.db.get_all_target_links(self.TARGET)
     sm = Sitemap(self.start_url, links)
     sm.build_xml()
     sm.build_visual()
@@ -376,8 +369,8 @@ class Project:
 
 
   def update_target_profiles(self, profiles):
-    self.db.update_target(self.Target, { 'profiles': profiles })
+    self.db.update_target(self.TARGET, { 'profiles': profiles })
 
 
   def add_vulns_to_target(self, vulns):
-    self.db.update_target(self.Target, { 'vulns': vulns })
+    self.db.update_target(self.TARGET, { 'vulns': vulns })

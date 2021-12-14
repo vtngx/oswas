@@ -47,7 +47,6 @@ def run_full():
 
   os.chdir(f'./{directory}')
 
-  #cmd = f'qterminal -e mitmdump -s {script_p} --ssl-insecure'
   cmd = f'qterminal -e mitmdump -s {script_p} --mode upstream:http://127.0.0.1:8888 --ssl-insecure'
   mitmproxy = subprocess.Popen(cmd, shell=True)
 

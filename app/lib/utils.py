@@ -185,7 +185,6 @@ class Utils:
 
   @staticmethod
   def map_link_traffic(link, target_id, output_dir, user_type):
-    # folderOutput = str(link).replace("/","SLASH")
     parent_dir = f"../output/{target_id}/{user_type}"
     path = os.path.join(parent_dir, output_dir)
 

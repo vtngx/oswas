@@ -26,8 +26,7 @@ class FormSpider:
           )),
         )
         return selects
-      except:
-        # print(f'finding select {n}')
+      except Exception:
         if n >= self.max_tries:
           return []
         n += 1
@@ -43,8 +42,7 @@ class FormSpider:
           )),
         )
         return inputs
-      except:
-        # print(f'finding input {n}')
+      except Exception:
         if n >= self.max_tries:
           return []
         n += 1
@@ -60,8 +58,7 @@ class FormSpider:
           )),
         )
         return textareas
-      except:
-        # print(f'finding textarea {n}')
+      except Exception:
         if n >= self.max_tries:
           return []
         n += 1
@@ -77,8 +74,7 @@ class FormSpider:
           )),
         )
         return submits
-      except:
-        # print(f'finding submit {n}')
+      except Exception:
         if n >= self.max_tries:
           return []
         n += 1
@@ -102,7 +98,7 @@ class FormSpider:
 
       s = Select(select_element)
       s.select_by_index(1)
-    except: 
+    except Exception: 
       pass
 
   def fill_input(self, input_element):
@@ -185,8 +181,6 @@ class FormSpider:
             EC.visibility_of_element_located(selector)
           )
         input_element.click()
-      elif type == InputTypes.RANGE:
-        pass
       elif type == InputTypes.SEARCH:
         if selector:
           input_element = WebDriverWait(self.driver, self.max_wait).until(
@@ -235,7 +229,7 @@ class FormSpider:
           else:
             input_element.send_keys('https://example.com/')
       # print(f'filled input type {type}')
-    except:
+    except Exception:
       # print(f"fill error {type} {selector}")
       pass
 
@@ -257,5 +251,5 @@ class FormSpider:
         )
 
       textarea_element.send_keys(('textarea'))
-    except:
+    except Exception:
       pass

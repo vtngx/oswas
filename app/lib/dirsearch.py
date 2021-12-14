@@ -4,11 +4,11 @@ from urllib.parse import urlparse
 
 class Dirsearch:
   
-  def __init__(self, url, parseUrl):
+  def __init__(self, url, parse_url):
     self._install()
     self.url = url
-    self.parseUrl = parseUrl
-    self.output_file = str(self.parseUrl) + '.dsout.txt'
+    self.parse_url = parse_url
+    self.output_file = str(self.parse_url) + '.dsout.txt'
 
   # clone from gh & install
   def _install(self):
@@ -21,14 +21,13 @@ class Dirsearch:
 
   # run dirsearch
   def _run(self):
-    path = os.getcwd()
     os.chdir('dirsearch')
     os.system(f'python3 dirsearch.py -t 50 -u {self.url} -e php,js,asp,aspx,html -i 200-399 -x 400-599 --format simple -o ../{self.output_file}')
     os.chdir("../")
     os.system('clear')
 
   # get links from dirsearch output
-  def getURL(self):
+  def get_url(self):
     file_name = f'{self.output_file}'
     list_urls = []
     
@@ -38,7 +37,7 @@ class Dirsearch:
           list_urls.append(line)
       # delete dirsearch output file
       os.remove(file_name)
-    except:
+    except Exception:
       pass
     
     if len(list_urls):

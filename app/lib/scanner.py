@@ -60,7 +60,7 @@ class Scanner:
 
       origin_path = self.cwd + link["traffic_file"]
 
-      # r=root, d=directories, f=files
+      # tdlr: r=root, d=directories, f=files
       for r, d, f in os.walk(origin_path):
         for file in f:
           if '.txt' in file:
@@ -161,15 +161,14 @@ class Scanner:
           diff_amount = SequenceMatcher(None, res_o.text, res_t.text).ratio() * 100
 
           # add to vuln list if 2 responses are >= 70% similar 
-          if res_t.status_code < 400:
-            if diff_amount > self.MIN_DIFF_PERCENTAGE:
-              is_vuln = True
-              self.VULN_LINKS.append({
-                "type": "Authentication Vulnerability",
-                "link": link["url"],
-                "vuln_link": f"{method} {url}",
-                "diff": diff_amount
-              })
+          if res_t.status_code < 400 and diff_amount > self.MIN_DIFF_PERCENTAGE:
+            is_vuln = True
+            self.VULN_LINKS.append({
+              "type": "Authentication Vulnerability",
+              "link": link["url"],
+              "vuln_link": f"{method} {url}",
+              "diff": diff_amount
+            })
 
           if is_vuln:
             print(Fore.RED + f'FOUND AUTH. VULN: {method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}' + Style.RESET_ALL)
@@ -188,7 +187,7 @@ class Scanner:
       if link["traffic_file"]:
         path = self.cwd + link["traffic_file"]
 
-        # r=root, d=directories, f=files
+        # tdlr: r=root, d=directories, f=files
         for r, d, f in os.walk(path):
           for file in f:
             if '.txt' in file:
@@ -225,7 +224,7 @@ class Scanner:
 
         origin_path = self.cwd + link["traffic_file"]
 
-        # r=root, d=directories, f=files
+        # tdlr: r=root, d=directories, f=files
         for r, d, f in os.walk(origin_path):
           for file in f:
             if '.txt' in file:
@@ -342,15 +341,14 @@ class Scanner:
 
               # add to vuln list if 2 responses are >= 70% similar
               # & status code != 401 and 403
-              if res_t.status_code < 400:
-                if diff_amount > self.MIN_DIFF_PERCENTAGE:
-                  is_vuln = True
-                  self.VULN_LINKS.append({
-                    "type": type,
-                    "link": link["url"],
-                    "vuln_link": f"{method} {url}",
-                    "diff": diff_amount
-                  })
+              if res_t.status_code < 400 and diff_amount > self.MIN_DIFF_PERCENTAGE:
+                is_vuln = True
+                self.VULN_LINKS.append({
+                  "type": type,
+                  "link": link["url"],
+                  "vuln_link": f"{method} {url}",
+                  "diff": diff_amount
+                })
 
               if is_vuln:
                 print(Fore.RED + f'FOUND IDOR. VULN: {method.upper()} {url} {res_t.status_code} {"{:.2f}".format(diff_amount)}' + Style.RESET_ALL)
