@@ -14,7 +14,6 @@ from .web_element import WebElementObj
 from urllib.parse import urlparse, urljoin
 from colorama.ansi import Back, Fore, Style
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from .constants import TargetStatus, UserCrawlType
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
@@ -32,7 +31,7 @@ class Project:
     self.MAX_WAIT = 2.5
 
 
-  # start function
+  # start a new project
   def start(self):
     while True:
       self.start_url = input(
@@ -58,7 +57,7 @@ class Project:
         print(Fore.RED + 'PLEASE INPUT VALID URL' + Style.RESET_ALL)
 
 
-  # MODULE 1
+  # identify login URL
   def find_auth_link(self):
     url = self.start_url
     auth_url = None
@@ -110,8 +109,8 @@ class Project:
     return auth_url   # returns None or login link
 
 
-  # MODULE 2
-  def get_all_website_links(self, url, driver):
+  # get all links in web page
+  def get_all_webpage_links(self, url, driver):
     # domain name of the URL without the protocol
     domain_name = urlparse(url).netloc
     try:
@@ -165,6 +164,7 @@ class Project:
     return self.urls
 
 
+  # get links by submiting forms
   def crawl_from_forms(self, driver):
     try:
       form_spider = FormSpider(self.MAX_TRIES, self.MAX_WAIT, driver)
@@ -229,13 +229,14 @@ class Project:
       pass
 
 
+  # crawl using breadth-first tree traversal
   def crawl(self, url, driver, user_type):
     # remove redundant files im /tmp
     os.system("rm -rf *")
     os.mkdir(f"../output/{self.TARGET}/{user_type}")
 
     # crawl a web page and get all links
-    links = self.get_all_website_links(url, driver)
+    links = self.get_all_webpage_links(url, driver)
 
     while True:
       # Open the first link we found in new tab
@@ -266,7 +267,7 @@ class Project:
           if current_url_in_browser not in Utils.format_urls(self.internal_urls):
             links.put(current_url_in_browser)
         else:
-          links = self.get_all_website_links(current_url_in_browser, driver)
+          links = self.get_all_webpage_links(current_url_in_browser, driver)
 
         driver.close()
 
@@ -303,6 +304,7 @@ class Project:
         return
 
 
+  # start new crawler
   def start_crawler(self, auth_url, driver, user_type: UserCrawlType):
     os.system("clear")
     print(
@@ -336,6 +338,7 @@ class Project:
     return crawled_links
 
 
+  # print all crawlers output
   def print_output_count(self, r_noauth, r_user1, r_user2, r_admin):
     os.system("clear")
 
@@ -358,7 +361,8 @@ class Project:
     if r_admin  or isinstance(r_admin, list):  print('ADMIN:' , len(r_admin))
     print()
 
-  
+
+  # create webapp sitemap
   def create_sitemap(self):
     os.chdir(f"output/{self.TARGET}")
     links = self.db.get_all_target_links(self.TARGET)
@@ -368,9 +372,11 @@ class Project:
     os.chdir("../..")
 
 
+  # update profiles number to db
   def update_target_profiles(self, profiles):
     self.db.update_target(self.TARGET, { 'profiles': profiles })
 
 
+  # update vulns found to db
   def add_vulns_to_target(self, vulns):
     self.db.update_target(self.TARGET, { 'vulns': vulns })

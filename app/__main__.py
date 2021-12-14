@@ -21,6 +21,7 @@ from lib.utils import Utils
 from selenium import webdriver
 from lib import Project, Options
 from lib.burpsuite import BurpSuite
+from colorama.ansi import Back, Style
 from lib.constants import UserCrawlType
 
 
@@ -31,6 +32,14 @@ def run_full():
 
   # identify auth url
   auth_url = project.find_auth_link()
+  os.system("clear")
+  if auth_url is None:
+    print(Back.RED + ' > ' + Style.RESET_ALL + ' Authentication URL not found\n')
+    print(Back.RED + ' > ' + Style.RESET_ALL + ' Preparing to crawl without authentication...\n\n')
+  else:
+    print(Back.GREEN + ' > ' + Style.RESET_ALL + f' Authentication URL found: \033[4m{auth_url}\033[0m\n')
+    print(Back.GREEN + ' > ' + Style.RESET_ALL + ' Preparing to crawl with authentication...\n\n')
+  time.sleep(4)
 
   burp = BurpSuite()
 

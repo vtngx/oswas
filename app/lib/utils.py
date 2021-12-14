@@ -67,7 +67,10 @@ class Utils:
 
   @staticmethod
   def pager_input(lines, limit):
-    print("> The following links are likely to be the login link:")
+    print(
+      Back.BLACK + Fore.WHITE + ' > ' + Style.RESET_ALL +\
+      ' The following links are likely to be the login link:\n'
+    )
 
     len_first_page = limit if len(lines) >= limit else len(lines)
 
@@ -76,11 +79,8 @@ class Utils:
 
     if len(lines) <= limit:
       c = input(
-        Back.BLACK +\
-        Fore.WHITE +\
-        f'\nSelect link to login (1-{i}) or 0 if you cannot find one:' +\
-        Style.RESET_ALL +\
-        ' '
+        '\n' + Back.RED + Fore.WHITE + ' ? ' + Style.RESET_ALL +\
+        f'Select link to login (1-{i}) or 0 if you cannot find one: '
       )
 
       if c.isdigit() and int(c) == 0:

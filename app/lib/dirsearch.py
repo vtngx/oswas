@@ -22,7 +22,7 @@ class Dirsearch:
   # run dirsearch
   def _run(self):
     os.chdir('dirsearch')
-    os.system(f'python3 dirsearch.py -t 50 -u {self.url} -e php,js,asp,aspx,html -i 200-399 -x 400-599 --format simple -o ../{self.output_file}')
+    os.system(f'python3 dirsearch.py -t 120 -u {self.url} -e php,js,asp,aspx,html -i 200-399 -x 400-599 --format simple -o ../{self.output_file}')
     os.chdir("../")
     os.system('clear')
 
