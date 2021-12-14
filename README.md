@@ -1,4 +1,4 @@
-# **OSWAS** <sup><sub><sup><sub><sup>**IAP491_G3**</sup></sub></sup></sub></sup>
+# **OSWAS** <sup><sub><sup><sub><sup>**IAP491_G3 / FPTU**</sup></sub></sup></sub></sup>
 
 ## **Overview**
 OSWAS (Optimized Solutions for WebApp Scanners) is a Capstone Project for FPT University. OSWAS aims to provide intergrated methods to web crawling & web vulnerability testing using Selenium Framework.
